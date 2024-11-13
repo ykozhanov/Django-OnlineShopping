@@ -18,6 +18,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from django.conf import settings
+from django.conf.urls.static import static
+from .view import footer, footer_about, header_top, header_search, header_main, index
+
 urlpatterns = [
     path("admin/", admin.site.urls),
 ]
+
+# delelte necesery
+
+
+urlpatterns += [
+    path('footer/', footer),
+    path('footer_about/', footer_about),
+    path('header_top/', header_top),
+    path('header_search/', header_search),
+    path('header_main/', header_main),
+    path('index/', index)
+]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
