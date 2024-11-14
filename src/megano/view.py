@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+# Delete file
 
 def footer(request):
     return render(request, 'footer.html')
