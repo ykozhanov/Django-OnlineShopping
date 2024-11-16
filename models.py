@@ -177,3 +177,44 @@ class Review(models.Model):
     class Meta:
         ordering = ['-created_at']
         unique_together = ('user', 'product')
+
+# Модель групп продуктов
+class ProductGroup(models.Model):
+    products = models.ManyToManyField(Product)
+
+# Модель скидок на группы продуктов
+class DiscountSet(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Название скидки')
+    groups = models.ManyToManyField(ProductGroup, verbose_name='Группы продуктов')
+    number_groups = models.IntegerField(verbose_name='Количество групп для получения скидки')
+    description = models.TextField(verbose_name='Описание скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Размер скидки')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
+
+# Модель скидок на корзину
+class CartDiscount(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Название скидки')
+    min_items = models.IntegerField(null=True, blank=True, verbose_name='Минимальное количество товаров')
+    max_items = models.IntegerField(null=True, blank=True, verbose_name='Максимальное количество товаров')
+    min_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Минимальная сумма')
+    max_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Максимальная сумма')
+    description = models.TextField(verbose_name='Описание скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount_type = models.CharField(max_length=10, choices=['percent', 'fixed'], verbose_name='Тип скидки')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Значение скидки')
+    min_remaining = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Минимальный остаток')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
+
+# Модель скидок на категории и группы продуктов
+class Discount(models.Model):
+    category = models.ForeignKey(Category, null=True, blank=True)
+    group = models.ForeignKey(ProductGroup, null=True, blank=True)
+
+    description = models.TextField(verbose_name='Описание скидки')
+    discount_percentage = models.FloatField(verbose_name='Процент скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
