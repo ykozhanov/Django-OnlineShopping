@@ -21,9 +21,10 @@ class Category(models.Model):
     icon = models.ImageField(upload_to='category_icons', blank=True, null=True, verbose_name='Иконка категории')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='children', verbose_name='Родительская категория')
     is_active = models.BooleanField(default=True, verbose_name='Статус активности')
+    sort_index = models.IntegerField(default=0, verbose_name='Индекс сортировки')
 
     class Meta:
-        ordering = ['name']
+        ordering = ['sort_index', 'name']
 
 # Модель баннеров
 class Banner(models.Model):
@@ -45,13 +46,13 @@ class Seller(models.Model):
     phone = models.CharField(max_length=20, verbose_name='Телефон')
     address = models.CharField(max_length=255, verbose_name='Адрес')
     email = models.EmailField(verbose_name='Email')
+    is_active = models.BooleanField(default=True, verbose_name='Статус активности')
 
 
-# Модель товаров и цен
+# Модель товаров
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название товара')
     description = models.TextField(verbose_name='Описание товара')
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена товара')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='products', verbose_name='Ключ на категорию товара', null=True)
     is_active = models.BooleanField(default=True, verbose_name='Статус доступности товара')
     image = models.ImageField(upload_to='products/', verbose_name='Изображение товара')
@@ -60,7 +61,7 @@ class Product(models.Model):
     sort_index = models.IntegerField(default=0, verbose_name='Индекс сортировки')
 
     class Meta:
-        ordering = ['sort_index', 'price', 'name']
+        ordering = ['sort_index', 'name']
 
 # Модель one-to-many Product - характеристики товара
 class ProductCharacteristic(models.Model):
@@ -72,10 +73,10 @@ class ProductCharacteristic(models.Model):
 class ProductSeller(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sellers', verbose_name='Ключ на продукт')
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='products', verbose_name='Ключ на продавца')
-    sales_count = models.IntegerField(default=0, verbose_name='Количество продаж')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена товара')
+    # sales_count = models.IntegerField(default=0, verbose_name='Количество продаж')
 
     class Meta:
-        ordering = ['-sales_count', 'seller']
         unique_together = ('product', 'seller')
 
 # Модель предложения дня
@@ -89,16 +90,16 @@ class DailyOffer(models.Model):
 
 # Модель корзины
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Ключ на пользователя')
+    session_id = models.CharField(max_length=255, verbose_name='ID сессии')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, verbose_name='Ключ на пользователя')
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, verbose_name='Ключ на корзину')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Ключ на товар')
     quantity = models.IntegerField(default=1, verbose_name='Количество товаров')
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, verbose_name='Ключ на продавца')
+    product_seller = models.ForeignKey(ProductSeller, on_delete=models.CASCADE, verbose_name='Ключ на продавца и товар')
 
     class Meta:
-       unique_together = ('cart', 'product', 'seller')
+       unique_together = ('cart', 'product_seller')
 
 # Модель способов оплаты
 class PaymentMethod(models.Model):
@@ -138,9 +139,10 @@ class Order(models.Model):
 # Модель one-to-many Order - OrderItem с количеством товаров
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Ключ на заказ')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Ключ на товар')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Ключ на товар')
     quantity = models.IntegerField(default=1, verbose_name='Количество товаров')
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, verbose_name='Ключ на продавца')
+    seller = models.ForeignKey(Seller, on_delete=models.PROTECT, verbose_name='Ключ на продавца')
+    product_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Стоимость товара')
 
     class Meta:
         unique_together = ('order', 'product', 'seller')
@@ -175,3 +177,44 @@ class Review(models.Model):
     class Meta:
         ordering = ['-created_at']
         unique_together = ('user', 'product')
+
+# Модель групп продуктов
+class ProductGroup(models.Model):
+    products = models.ManyToManyField(Product)
+
+# Модель скидок на группы продуктов
+class DiscountSet(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Название скидки')
+    groups = models.ManyToManyField(ProductGroup, verbose_name='Группы продуктов')
+    number_groups = models.IntegerField(verbose_name='Количество групп для получения скидки')
+    description = models.TextField(verbose_name='Описание скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Размер скидки')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
+
+# Модель скидок на корзину
+class CartDiscount(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Название скидки')
+    min_items = models.IntegerField(null=True, blank=True, verbose_name='Минимальное количество товаров')
+    max_items = models.IntegerField(null=True, blank=True, verbose_name='Максимальное количество товаров')
+    min_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Минимальная сумма')
+    max_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Максимальная сумма')
+    description = models.TextField(verbose_name='Описание скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount_type = models.CharField(max_length=10, choices=['percent', 'fixed'], verbose_name='Тип скидки')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Значение скидки')
+    min_remaining = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Минимальный остаток')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
+
+# Модель скидок на категории и группы продуктов
+class Discount(models.Model):
+    category = models.ForeignKey(Category, null=True, blank=True)
+    group = models.ForeignKey(ProductGroup, null=True, blank=True)
+
+    description = models.TextField(verbose_name='Описание скидки')
+    discount_percentage = models.FloatField(verbose_name='Процент скидки')
+    start_date = models.DateTimeField(verbose_name='Дата начала скидки')
+    end_date = models.DateTimeField(verbose_name='Дата окончания скидки')
+    discount_priority = models.IntegerField(verbose_name='Приоритет скидки')
