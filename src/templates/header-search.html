@@ -11,18 +11,7 @@
                          </div>
                          <span class="CategoriesButton-text">Все категории</span>
                          <div class="CategoriesButton-arrow"></div>
-
-<!--                            Здесь нужно идти циклом по категории и выводить отдельно каждую категорию, ниже пример-->
-<!--                         Начало Примера-->
-                         <div class="CategoriesButton-content">
-                            <div class="CategoriesButton-link"><a href="#">
-                                    <div class="CategoriesButton-icon"><img src="{% static 'assets/img/icons/departments/1.svg' %}" alt="1.svg" />
-                                    </div><span class="CategoriesButton-text">Телевизоры(Например)</span>
-                                </a>
-                            </div>
-                         </div>
-<!--                         Конец примера-->
-
+                            {% include "category-menu.html" %}
                      </div>
                  </div>
              </div>
