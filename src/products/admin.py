@@ -142,9 +142,3 @@ class SiteSettingAdmin(admin.ModelAdmin):
             sender=Category,)
         self.message_user(request, message="Category menu cache successfully cleared.",)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
-
-    def change_list_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['trigger_clear_menu_cache_signal_url'] = 'trigger-clear-menu-cache/'  # URL действия
-        return super().change_list_view(request, extra_context=extra_context)
-
