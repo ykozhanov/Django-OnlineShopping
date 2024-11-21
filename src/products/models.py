@@ -60,6 +60,7 @@ class Category(MPTTModel):
     def __str__(self):
         return f'{self.name}'
 
+
 class Product(models.Model):
     """Product model"""
 
@@ -159,3 +160,22 @@ class ProductCharacteristicValue(models.Model):
         verbose_name='Characteristic value',
     )
 
+
+class SiteSetting(models.Model):
+    key = models.CharField(max_length=100, unique=True, verbose_name="Key")
+    value = models.TextField(verbose_name="Value")
+
+    class Meta:
+        verbose_name = "Site setting"
+        verbose_name_plural = "Site settings"
+
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+
+    @staticmethod
+    def get_or_create_default( key, default=None):
+        setting, created = SiteSetting.objects.get_or_create(
+            key=key,
+            defaults={'value': default}
+        )
+        return setting.value

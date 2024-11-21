@@ -1,0 +1,40 @@
+{% load category_filters %}
+{% load cache %}
+<div class="CategoriesButton-content">
+    {% cache MENU_CACHE_TIMEOUT_SETTING category-menu %}
+        {% with category_list|filter_active as active_category_list %}
+            {% for category in active_category_list|filter_children:None %}
+                <div class="CategoriesButton-link">
+                    <a href="#{{ category.pk }}">
+                        <div class="CategoriesButton-icon">
+                            {% if category.icon %}
+                                {% with "/media/"|add:category.icon.name as icon_path %}
+                                        <img src="{{ icon_path }}" alt="{{ category.name }}" />
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                        <span class="CategoriesButton-text">{{ category.name }}</span>
+                    </a>
+                    {% for category_sub in active_category_list|filter_children:category  %}
+                        {% if forloop.first %}
+                            <a class="CategoriesButton-arrow" href="#"></a>
+                            <div class="CategoriesButton-submenu" style="display: none;">
+                        {% endif %}
+                            <a class="CategoriesButton-link" href="#{{ category_sub.pk }}">
+                                <div class="CategoriesButton-icon">
+                                    {% if category_sub.icon %}
+                                        {% with "/media/"|add:category_sub.icon.name as icon_path %}
+                                            <img src="{{ icon_path }}" alt="{{ category_sub.name }}" />
+                                        {% endwith %}
+                                    {% endif %}
+                                </div><span class="CategoriesButton-text">{{ category_sub.name }}</span>
+                            </a>
+                        {% if forloop.last %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endwith %}
+    {% endcache %}
+</div>
