@@ -1,15 +1,17 @@
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import path
 from django_mptt_admin.admin import DjangoMpttAdmin
 from django.utils.html import format_html
 
-from .models import Category, Characteristic, Product, ProductCharacteristicValue
-
+from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting
+from .signals import clear_menu_cache_signal
 
 @admin.action(description='Deactivate entities')
 def mark_inactive(modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet):
     queryset.update(is_active=False)
+
 
 @admin.action(description='Activate entities')
 def mark_active(modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet):
@@ -103,6 +105,7 @@ class ProductAdmin(admin.ModelAdmin):
         """Creates shorrt description"""
         return obj.description if len(obj.description) < 48 else obj.description[:48] + '...'
 
+
 @admin.register(Characteristic)
 class CharacteristicAdmin(admin.ModelAdmin):
     """Displaying characteristics in admin panel"""
@@ -116,4 +119,32 @@ class CharacteristicAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+@admin.register(SiteSetting)
+class SiteSettingAdmin(admin.ModelAdmin):
+    """Displaying site settings in admin panel"""
+    list_display = ('key', 'value')
+    search_fields = ('key',)
+    change_list_template = "products/settings_changelist.html"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'trigger-clear-menu-cache/',
+                self.admin_site.admin_view(self.send_clear_menu_cache_on_category_change),
+                name='clear_menu_cache_on_category_change_trigger_signal',
+            ),
+        ]
+        return custom_urls + urls
+
+    def send_clear_menu_cache_on_category_change(self, request):
+        clear_menu_cache_signal.send(
+            sender=Category,)
+        self.message_user(request, message="Category menu cache successfully cleared.",)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
+
+    def change_list_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['trigger_clear_menu_cache_signal_url'] = 'trigger-clear-menu-cache/'  # URL действия
+        return super().change_list_view(request, extra_context=extra_context)
 
