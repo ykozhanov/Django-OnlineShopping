@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
     "products.apps.ProductsConfig",
+    "profiles",
 ]
 
 MIDDLEWARE = [
@@ -133,3 +134,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'uploads'
+
+AUTH_USER_MODEL = 'profiles.User'
