@@ -1,5 +1,6 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+from django.contrib.auth.models import User
 
 def category_icon_directory_path(instance: 'Category', filename: str):
     return 'categories/category_{pk}/icon/{filename}'.format(
@@ -179,3 +180,13 @@ class SiteSetting(models.Model):
             defaults={'value': default}
         )
         return setting.value
+
+
+class ReviewModel(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.user.username} on {self.product.name}'

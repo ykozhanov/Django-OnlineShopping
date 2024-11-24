@@ -1,0 +1,18 @@
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+<form class="form" action="{% url 'add_review' product.id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-group">
+        <button class="btn btn_muted" type="submit">Отправить отзыв</button>
+    </div>
+</form>

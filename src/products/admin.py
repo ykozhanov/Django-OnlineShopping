@@ -5,8 +5,9 @@ from django.urls import path
 from django_mptt_admin.admin import DjangoMpttAdmin
 from django.utils.html import format_html
 
-from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting
+from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
 from .signals import clear_menu_cache_signal
+
 
 @admin.action(description='Deactivate entities')
 def mark_inactive(modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet):
@@ -142,3 +143,8 @@ class SiteSettingAdmin(admin.ModelAdmin):
             sender=Category,)
         self.message_user(request, message="Category menu cache successfully cleared.",)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
+
+@admin.register(ReviewModel)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'created_at')
+    search_fields = ('product__name', 'user__username')

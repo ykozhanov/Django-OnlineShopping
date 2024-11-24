@@ -1,3 +1,26 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import DetailView
+
+from .models import Product
+from .forms import ReviewForm
+
 
 # Create your views here.
+
+class ProductDetailView(DetailView):
+    model = Product
+
+
+def add_review(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            return redirect('product-detail', pk=product.id)
+    else:
+        form = ReviewForm()
+    return render(request, 'products/product_detail.html', {'object': product, 'form': form})
