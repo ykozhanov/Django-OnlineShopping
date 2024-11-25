@@ -144,7 +144,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
         self.message_user(request, message="Category menu cache successfully cleared.",)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
 
+
 @admin.register(ReviewModel)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('product', 'user', 'created_at')
+    list_display = ('pk','product', 'user',  'text', 'created_at')
+    list_display_links = 'pk', 'product'
     search_fields = ('product__name', 'user__username')
+

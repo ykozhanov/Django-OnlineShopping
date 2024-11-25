@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
+
+
+
 {% block content %}
+
+{% include 'header-top.html' %}
+{% include 'header-main.html' %}
+{% include 'header-search.html' %}
+<p></p>
+
 <div class="Tabs Tabs_default">
     <div class="Tabs-links">
         <a class="Tabs-link_ACTIVE Tabs-link" href="#description">
@@ -12,67 +21,11 @@
             <span>Характеристика</span>
         </a>
         <a class="Tabs-link" href="#reviews">
-            <span>Отзывы (3)</span>
+            <span>Отзывы ({{ object.reviews.all| length }})</span>
         </a>
     </div>
-    <div class="Tabs-wrap">
-        <div class="Tabs-block" id="description">
-            <h2>Megano Store Hystory
-            </h2>
-        </div>
-        <div class="Tabs-block" id="sellers">
-        </div>
-        <div class="Tabs-block" id="addit">
-        </div>
+        {% include 'products/add_review.html' %}
 
-        <div class="Tabs-block" id="reviews">
-            <header class="Section-header">
-                <h3 class="Section-title">{{ object.reviews.all| length }} отзыв
-                </h3>
-            </header>
-            {% for review in object.reviews.all %}
-            <div class="Comments">
-                <div class="Comment">
-                    <div class="Comment-column Comment-column_pict">
-                        <div class="Comment-avatar">
-                        </div>
-                    </div>
-                    <div class="Comment-column">
-                        <header class="Comment-header">
-                            <div>
-                                <strong class="Comment-title">{{ review.user.username }}
-                                </strong><span class="Comment-date"> {{ review.created_at|date:"F d / Y / H:i" }}</span>
-                            </div>
-                        </header>
-                        <div class="Comment-content"> {{ review.text }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-
-            <header class="Section-header Section-header_product">
-                <h3 class="Section-title">Добавить отзыв
-                </h3>
-            </header>
-            <div class="Tabs-addComment">
-
-                <form class="form" action="{% url 'add_review' object.id %}" method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <textarea class="form-textarea" name="text" id="review" placeholder="Отзыв"></textarea>
-                        <input type="hidden" name="product" value="{{ object.pk }}">
-                        <input type="hidden" name="user" value="{{ request.user.pk }}">
-                    </div>
-
-                    <div class="form-group">
-                        <button class="btn btn_muted" type="submit">Отправить отзыв
-                        </button>
-                    </div>
-                </form>
-
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

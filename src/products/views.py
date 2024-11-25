@@ -11,9 +11,9 @@ class ProductDetailView(DetailView):
     model = Product
 
 
-def add_review(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def add_review(request):
     if request.method == 'POST':
+        product = get_object_or_404(Product, id=request.POST["product"])
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
@@ -21,6 +21,9 @@ def add_review(request, product_id):
             review.user = request.user
             review.save()
             return redirect('product-detail', pk=product.id)
-    else:
-        form = ReviewForm()
-    return render(request, 'products/product_detail.html', {'object': product, 'form': form})
+        error_messages = []
+        for field, errors in form.errors.items():
+            for error in errors:
+                error_messages.append(f"{error}")
+        return render(request, 'products/product_detail.html',
+                      {'object': product, 'form': form, 'error_messages': error_messages})
