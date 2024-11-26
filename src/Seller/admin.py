@@ -6,13 +6,13 @@ from django.utils.safestring import mark_safe
 from .models import Seller, ProductSeller, User, Product
 
 
-@admin.register(User)
-class UserAdmin(UserAdmin):
-    def get_groups(self, obj):
-        return [group.name for group in obj.groups.all()]
-
-    list_display = ('username', 'is_staff',  'get_groups')
-    list_display_links = ('username',)
+# @admin.register(User)
+# class UserAdmin(UserAdmin):
+#     def get_groups(self, obj):
+#         return [group.name for group in obj.groups.all()]
+#
+#     list_display = ('username', 'is_staff',  'get_groups')
+#     list_display_links = ('username',)
 
 
 def user_has_permission(user, group_name) -> bool:
