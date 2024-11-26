@@ -44,29 +44,23 @@
         </header>
         <div class="Tabs-addComment">
 
-            <form class="form" action="{% url 'add_review' %}" method="post">
+            <form class="form" action="{% url 'add_review' pk=object.pk %}" method="post">
                 {% csrf_token %}
+
                 <div class="form-group">
-
-                    {% if error_messages %}
-                    <div style="color: red;font-weight: bold;margin-bottom: 10px">
-                        <ul>
-                            {% for message in error_messages %}
-                            <li>{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-
+                    {% if form %}
+                    {{ form.as_p }}
+                    {% else %}
                     <textarea class="form-textarea" name="text" id="review" placeholder="Отзыв"></textarea>
-                    <input type="hidden" name="product" value="{{ object.pk }}">
-                    <input type="hidden" name="user" value="{{ request.user.pk }}">
+                    {% endif %}
                 </div>
 
+                <input type="hidden" name="user" value="{{ request.user.pk }}">
                 <div class="form-group">
                     <button class="btn btn_muted" type="submit">Отправить отзыв
                     </button>
                 </div>
+
             </form>
         </div>
 

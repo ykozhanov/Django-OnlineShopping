@@ -147,7 +147,13 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
 @admin.register(ReviewModel)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('pk','product', 'user',  'text', 'created_at')
-    list_display_links = 'pk', 'product'
+    """Displaying reviews in damin panel"""
+    list_display = ('pk','product', 'user',  'text_short', 'created_at')
+    list_display_links = ('pk', 'product')
     search_fields = ('product__name', 'user__username')
+    ordering = ('pk', 'product', 'created_at')
+
+    def text_short(self, obj: ReviewModel) -> str:
+        """Creates short text"""
+        return obj.text if len(obj.text) < 48 else obj.text[:48] + '...'
 
