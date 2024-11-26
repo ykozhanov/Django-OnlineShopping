@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.safestring import mark_safe
 
 from .models import Seller, ProductSeller, User, Product
 
@@ -7,7 +8,7 @@ from .models import Seller, ProductSeller, User, Product
 # @admin.register(User)
 # class UserAdmin(UserAdmin):
 #     def get_groups(self, obj):
-#         return ', '.join([group.name for group in obj.groups.all()])
+#         return [group.name for group in obj.groups.all()]
 #
 #     list_display = ('username', 'is_staff',  'get_groups')
 #     list_display_links = ('username',)
@@ -15,21 +16,35 @@ from .models import Seller, ProductSeller, User, Product
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'email', 'phone', 'address', 'is_active', 'description', 'image', 'user')
+    fields = ('user', 'name', 'email', 'phone', 'address', 'description', 'image', 'get_image', 'is_active')
+    list_display = ('id', 'name', 'email', 'phone', 'address', 'is_active', 'description', 'get_image', 'user')
     list_display_links = ('name', )
     search_fields = ('name', 'user__username')
+    readonly_fields = ('get_image', )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if not request.user.is_superuser:
+        if request.user.groups.filter(name='moderators').exists():
             if db_field.name == "user":
                 kwargs["queryset"] = User.objects.filter(id=request.user.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.groups.filter(name='moderators').exists():
             return Seller.objects.all()
         else:
             return Seller.objects.filter(user=request.user)
+
+    @admin.display(description='Изображение')
+    def get_image(self, seller: Seller):
+        if seller.image:
+            return mark_safe(f'<img src="{seller.image.url}" width="50" height="50">')
+        return 'Нет изображения'
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if not obj:
+            form.base_fields['user'].initial = request.user
+        return form
 
 
 class ActiveSellerFilter(admin.SimpleListFilter):
@@ -74,13 +89,13 @@ class ProductSellerAdmin(admin.ModelAdmin):
         return request.user._sellers_exist
 
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if request.user.groups.filter(name='moderators').exists():
             return ProductSeller.objects.all()
         queryset = ProductSeller.objects.filter(seller__user=request.user)
         return queryset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if not request.user.is_superuser:
+        if not request.user.groups.filter(name='moderators').exists():
             if db_field.name == "seller":
                 kwargs["queryset"] = Seller.objects.filter(user=request.user)
             if db_field.name == "product":
