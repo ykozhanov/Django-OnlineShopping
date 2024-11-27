@@ -12,30 +12,34 @@
     <div class="Tabs-block" id="reviews">
         <header class="Section-header">
             <h3 class="Section-title">
-                {{ object.reviews.all| length }} {{ object.reviews.all|length|ru_pluralize:"отзыв,отзыва,отзывов" }}
+                {{ object.reviews.all|active_reviews| length }} {{ object.reviews.all|active_reviews|length|ru_pluralize:"отзыв,отзыва,отзывов" }}
             </h3>
         </header>
-
-        {% for review in object.reviews.all %}
-        <div class="Comments">
-            <div class="Comment">
-                <div class="Comment-column Comment-column_pict">
-                    <div class="Comment-avatar">
-                    </div>
-                </div>
-                <div class="Comment-column">
-                    <header class="Comment-header">
-                        <div>
-                            <strong class="Comment-title">{{ review.user.username }}
-                            </strong><span class="Comment-date"> {{ review.created_at|date:"F d / Y / H:i" }}</span>
+        <div id="reviews-container">
+            {% for review in object.reviews.all|active_reviews|order_by:"-created_at"|slice:":5" %}
+            <div class="Comments">
+                <div class="Comment">
+                    <div class="Comment-column Comment-column_pict">
+                        <div class="Comment-avatar">
                         </div>
-                    </header>
-                    <div class="Comment-content"> {{ review.text }}
+                    </div>
+                    <div class="Comment-column">
+                        <header class="Comment-header">
+                            <div>
+                                <strong class="Comment-title">{{ review.user.username }}
+                                </strong><span class="Comment-date"> {{ review.created_at|date:"F d / Y / H:i" }}</span>
+                            </div>
+                        </header>
+                        <div class="Comment-content"> {{ review.text }}
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+        <div style="display: flex; justify-content: center;margin-top: 20px;">
+            <button id="load-more-button" class="btn btn_muted">Показать еще</button>
+        </div>
 
         {% if user.is_authenticated %}
         <header class="Section-header Section-header_product">
@@ -44,7 +48,7 @@
         </header>
         <div class="Tabs-addComment">
 
-            <form class="form" action="{% url 'add_review' pk=object.pk %}" method="post">
+            <form id="review-form" class="form" action="{% url 'add_review' pk=object.pk %}" method="post">
                 {% csrf_token %}
 
                 <div class="form-group">
@@ -57,10 +61,8 @@
 
                 <input type="hidden" name="user" value="{{ request.user.pk }}">
                 <div class="form-group">
-                    <button class="btn btn_muted" type="submit">Отправить отзыв
-                    </button>
+                    <button class="btn btn_muted" type="submit">Отправить отзыв</button>
                 </div>
-
             </form>
         </div>
 
@@ -68,10 +70,11 @@
         <header class="Section-header Section-header_product">
             <h3 class="Section-title">
                 <div>Чтобы оставить отзыв, вам нужно авторизоваться</div>
-                <div><a href="#">Вход</div>
+                <div><a href="#">Вход</a></div>
             </h3>
         </header>
         {% endif %}
-
     </div>
 </div>
+{% include 'products/script_more_load.html' %}
+{% include 'products/script_add_review.html' %}

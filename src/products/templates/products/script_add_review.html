@@ -1,0 +1,53 @@
+<script>
+    document.getElementById('review-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        const text = form.querySelector('[name=text]').value;
+        const objectId = {{ object.pk }};
+
+        fetch(`{% url 'add_review' pk=object.pk %}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'text': text,
+                'csrfmiddlewaretoken': csrfToken
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reviewsContainer = document.getElementById('reviews-container');
+            const reviewHtml = `
+                <div class="Comments">
+                    <div class="Comment">
+                        <div class="Comment-column Comment-column_pict">
+                            <div class="Comment-avatar"></div>
+                        </div>
+                        <div class="Comment-column">
+                            <header class="Comment-header">
+                                <div>
+                                    <strong class="Comment-title">${data.username}</strong>
+                                    <span class="Comment-date">${data.created_at}</span>
+                                </div>
+                            </header>
+                            <div class="Comment-content">${data.text}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            reviewsContainer.insertAdjacentHTML('afterbegin', reviewHtml);
+            form.reset();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+</script>

@@ -1,0 +1,51 @@
+<script>
+    document.getElementById('load-more-button').addEventListener('click', function() {
+        const objectId = {{ object.pk }};
+        const offset = document.querySelectorAll('.Comments').length;
+        const csrfToken = '{{ csrf_token }}';
+
+        fetch(`{% url 'load_reviews' pk=object.pk offset=0 %}`.replace('0', offset), {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reviewsContainer = document.getElementById('reviews-container');
+            data.reviews.forEach(review => {
+                const reviewHtml = `
+                    <div class="Comments">
+                        <div class="Comment">
+                            <div class="Comment-column Comment-column_pict">
+                                <div class="Comment-avatar"></div>
+                            </div>
+                            <div class="Comment-column">
+                                <header class="Comment-header">
+                                    <div>
+                                        <strong class="Comment-title">${review.username}</strong>
+                                        <span class="Comment-date">${review.created_at}</span>
+                                    </div>
+                                </header>
+                                <div class="Comment-content">${review.text}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                reviewsContainer.insertAdjacentHTML('beforeend', reviewHtml);
+            });
+
+            if (!data.has_more) {
+                document.getElementById('load-more-button').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+</script>

@@ -17,3 +17,16 @@ def ru_pluralize(value, arg):
         return args[1]
     else:
         return args[2]
+
+
+@register.filter
+def active_reviews(value):
+    """
+    Фильтрует в шаблонах модели по полю 'is_active'
+    """
+    return value.filter(is_active=True)
+
+@register.filter
+def order_by(queryset, args):
+    args = [x.strip() for x in args.split(',')]
+    return queryset.order_by(*args)
