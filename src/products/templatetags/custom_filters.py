@@ -5,7 +5,7 @@ register = template.Library()
 @register.filter
 def ru_pluralize(value, arg):
     """
-    Склоняет слово в зависимости от числа
+    Pluralizes a word based on the given number
     """
     args = arg.split(',')
     if len(args) != 3:
@@ -20,13 +20,21 @@ def ru_pluralize(value, arg):
 
 
 @register.filter
-def active_reviews(value):
+def filter_by(value, args):
     """
-    Фильтрует в шаблонах модели по полю 'is_active'
+    Filters a queryset to include only active reviews
     """
-    return value.filter(is_active=True)
+    filters = {}
+    for pair in args.split(','):
+        field, val = pair.split('=')
+        filters[field.strip()] = val.strip()
+    return value.filter(**filters)
+
 
 @register.filter
 def order_by(queryset, args):
+    """
+    Orders a queryset by the specified fields.
+    """
     args = [x.strip() for x in args.split(',')]
     return queryset.order_by(*args)

@@ -12,11 +12,12 @@
     <div class="Tabs-block" id="reviews">
         <header class="Section-header">
             <h3 class="Section-title">
-                {{ object.reviews.all|active_reviews| length }} {{ object.reviews.all|active_reviews|length|ru_pluralize:"отзыв,отзыва,отзывов" }}
+                {{ object.reviews|filter_by:"is_active=True"| length }}
+                {{ object.reviews|filter_by:"is_active=True"|length|ru_pluralize:"отзыв,отзыва,отзывов" }}
             </h3>
         </header>
         <div id="reviews-container">
-            {% for review in object.reviews.all|active_reviews|order_by:"-created_at"|slice:":5" %}
+            {% for review in object.reviews.all|filter_by:"is_active=True"|order_by:"-created_at"|slice:":5" %}
             <div class="Comments">
                 <div class="Comment">
                     <div class="Comment-column Comment-column_pict">
@@ -37,9 +38,12 @@
             </div>
             {% endfor %}
         </div>
-        <div style="display: flex; justify-content: center;margin-top: 20px;">
-            <button id="load-more-button" class="btn btn_muted">Показать еще</button>
-        </div>
+
+        {% if object.reviews|filter_by:"is_active=True"|length > 5 %}
+            <div style="display: flex; justify-content: center;margin-top: 20px;">
+                <button id="load-more-button" class="btn btn_muted">Показать еще</button>
+            </div>
+        {% endif %}
 
         {% if user.is_authenticated %}
         <header class="Section-header Section-header_product">
@@ -47,19 +51,13 @@
             </h3>
         </header>
         <div class="Tabs-addComment">
+            <div id="error-messages" style="color: red;"></div>
 
             <form id="review-form" class="form" action="{% url 'add_review' pk=object.pk %}" method="post">
                 {% csrf_token %}
-
                 <div class="form-group">
-                    {% if form %}
-                    {{ form.as_p }}
-                    {% else %}
                     <textarea class="form-textarea" name="text" id="review" placeholder="Отзыв"></textarea>
-                    {% endif %}
                 </div>
-
-                <input type="hidden" name="user" value="{{ request.user.pk }}">
                 <div class="form-group">
                     <button class="btn btn_muted" type="submit">Отправить отзыв</button>
                 </div>
@@ -76,5 +74,131 @@
         {% endif %}
     </div>
 </div>
-{% include 'products/script_more_load.html' %}
-{% include 'products/script_add_review.html' %}
+
+<script>
+<!--    Скрипт для добавления нового отзыва без обновления страницы-->
+    document.getElementById('review-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        const text = form.querySelector('[name=text]').value;
+        const objectId = {{ object.pk }};
+
+        fetch(`{% url 'add_review' pk=object.pk %}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'text': text,
+                'csrfmiddlewaretoken': csrfToken
+            })
+        })
+        .then(response => {
+            if (response.status === 400) {
+                return response.json().then(data => {
+                    throw data;
+                });
+            }
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reviewsContainer = document.getElementById('reviews-container');
+            const reviewHtml = `
+                <div class="Comments">
+                    <div class="Comment">
+                        <div class="Comment-column Comment-column_pict">
+                            <div class="Comment-avatar"></div>
+                        </div>
+                        <div class="Comment-column">
+                            <header class="Comment-header">
+                                <div>
+                                    <strong class="Comment-title">${data.username}</strong>
+                                    <span class="Comment-date">${data.created_at}</span>
+                                </div>
+                            </header>
+                            <div class="Comment-content">${data.text}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            reviewsContainer.insertAdjacentHTML('afterbegin', reviewHtml);
+            form.reset();
+            document.getElementById('error-messages').innerHTML = '';
+        })
+        .catch(error => {
+            if (error.errors) {
+                const errorMessages = document.getElementById('error-messages');
+                errorMessages.innerHTML = '';
+                for (const field in error.errors) {
+                    const errorList = document.createElement('ul');
+                    error.errors[field].forEach(errorMsg => {
+                        const errorItem = document.createElement('li');
+                        errorItem.textContent = errorMsg;
+                        errorList.appendChild(errorItem);
+                    });
+                    errorMessages.appendChild(errorList);
+                }
+            } else {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        });
+    });
+
+<!--    Скрипт для добавления кнопки "показать еще"-->
+    document.getElementById('load-more-button').addEventListener('click', function() {
+        const objectId = {{ object.pk }};
+        const offset = document.querySelectorAll('.Comments').length;
+        const csrfToken = '{{ csrf_token }}';
+
+        fetch(`{% url 'load_reviews' pk=object.pk offset=0 %}`.replace('0', offset), {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const reviewsContainer = document.getElementById('reviews-container');
+            data.reviews.forEach(review => {
+                const reviewHtml = `
+                    <div class="Comments">
+                        <div class="Comment">
+                            <div class="Comment-column Comment-column_pict">
+                                <div class="Comment-avatar"></div>
+                            </div>
+                            <div class="Comment-column">
+                                <header class="Comment-header">
+                                    <div>
+                                        <strong class="Comment-title">${review.username}</strong>
+                                        <span class="Comment-date">${review.created_at}</span>
+                                    </div>
+                                </header>
+                                <div class="Comment-content">${review.text}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                reviewsContainer.insertAdjacentHTML('beforeend', reviewHtml);
+            });
+
+            if (!data.has_more) {
+                document.getElementById('load-more-button').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+</script>
+
+
