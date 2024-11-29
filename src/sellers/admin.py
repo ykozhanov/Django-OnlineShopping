@@ -3,8 +3,8 @@ from django.core.cache import cache
 from django.utils.safestring import mark_safe
 
 from .models import Seller, ProductSeller
-from users.models import User
-from product.models import Product
+from profiles.models import User
+from products.models import Product
 
 
 def user_has_permission(user, group_name) -> bool:

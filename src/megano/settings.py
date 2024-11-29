@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    "debug_toolbar",
     "mptt",
     "django_mptt_admin",
+
     "products.apps.ProductsConfig",
     "profiles",
+    "sellers.apps.SellerConfig",
 ]
 
 MIDDLEWARE = [

@@ -1,7 +1,7 @@
 from django.db import models
 
-from users.models import User
-from product.models import Product
+from profiles.models import User
+from products.models import Product
 
 
 class Seller(models.Model):
