@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 
 from .models import Seller, ProductSeller
 from profiles.models import User
-from products.models import Product
 
 
 def user_has_permission(user, group_name) -> bool:
@@ -20,8 +19,8 @@ def user_has_permission(user, group_name) -> bool:
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    fields = ('user', 'name', 'email', 'phone', 'address', 'description', 'image', 'get_image', 'is_active')
-    list_display = ('id', 'name', 'email', 'phone', 'address', 'is_active', 'description', 'get_image', 'user')
+    fields = ('user', 'name', 'phone', 'address', 'description', 'image', 'get_image', 'is_active')
+    list_display = ('id', 'name', 'phone', 'address', 'is_active', 'description', 'get_image', 'user')
     list_display_links = ('name', )
     search_fields = ('name', 'user__username')
     readonly_fields = ('get_image', )
@@ -114,7 +113,4 @@ class ProductSellerAdmin(admin.ModelAdmin):
         if not user_has_permission(request.user, 'moderators'):
             if db_field.name == "seller":
                 kwargs["queryset"] = Seller.objects.filter(user=request.user)
-            if db_field.name == "product":
-                sellers = Seller.objects.filter(user=request.user)
-                kwargs["queryset"] = Product.objects.filter(sellers__seller__in=sellers).distinct()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
