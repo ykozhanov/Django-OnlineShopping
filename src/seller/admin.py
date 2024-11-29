@@ -1,18 +1,10 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 from django.core.cache import cache
 from django.utils.safestring import mark_safe
 
-from .models import Seller, ProductSeller, User, Product
-
-
-# @admin.register(User)
-# class UserAdmin(UserAdmin):
-#     def get_groups(self, obj):
-#         return [group.name for group in obj.groups.all()]
-#
-#     list_display = ('username', 'is_staff',  'get_groups')
-#     list_display_links = ('username',)
+from .models import Seller, ProductSeller
+from users.models import User
+from product.models import Product
 
 
 def user_has_permission(user, group_name) -> bool:
@@ -53,7 +45,7 @@ class SellerAdmin(admin.ModelAdmin):
 
     @admin.display(description='Изображение')
     def get_image(self, seller: Seller):
-        """Возвращает иконку seller если она есть."""
+        """Возвращает изображение seller если оно есть."""
         if seller.image:
             return mark_safe(f'<img src="{seller.image.url}" width="50" height="50">')
         return 'Нет изображения'
