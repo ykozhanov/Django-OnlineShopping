@@ -1,21 +1,9 @@
 from django.contrib import admin
-from django.core.cache import cache
 from django.utils.safestring import mark_safe
 
 from .models import Seller, ProductSeller
 from profiles.models import User
 
-
-def user_has_permission(user, group_name) -> bool:
-    """Проверяет, принадлежит ли пользователь к указанной группе. с кэшированием."""
-    if user.is_superuser:
-        return True
-    cache_key = f"user_{user.id}_group_{group_name}"
-    has_group = cache.get(cache_key)
-    if has_group is None:
-        has_group = user.groups.filter(name=group_name).exists()
-        cache.set(cache_key, has_group, timeout=60)
-    return has_group
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
@@ -27,7 +15,7 @@ class SellerAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """Настраивает выбор пользователя для поля user при создании или редактировании seller."""
-        if not user_has_permission(request.user, 'moderators'):
+        if not request.user.has_perm('moderators'):
             if db_field.name == "user":
                 kwargs["queryset"] = User.objects.filter(id=request.user.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -37,7 +25,7 @@ class SellerAdmin(admin.ModelAdmin):
         Возвращает sellers для отображения.
         Если у пользователя есть разрешение "moderators", он видит всех sellers; иначе — только своих.
         """
-        if user_has_permission(request.user, 'moderators'):
+        if request.user.has_perm('moderators'):
             return Seller.objects.all()
         else:
             return Seller.objects.filter(user=request.user)
@@ -103,14 +91,14 @@ class ProductSellerAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         """Возвращает список моделей product-seller для отображения."""
-        if user_has_permission(request.user, 'moderators'):
+        if request.user.has_perm('moderators'):
             return ProductSeller.objects.all()
         queryset = ProductSeller.objects.filter(seller__user=request.user)
         return queryset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """Для текущего пользователя возвращает список доступных product и список доступных seller."""
-        if not user_has_permission(request.user, 'moderators'):
+        if not request.user.has_perm('moderators'):
             if db_field.name == "seller":
                 kwargs["queryset"] = Seller.objects.filter(user=request.user)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
