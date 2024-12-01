@@ -1,19 +1,17 @@
 {% load custom_filters %}
 <div class="Tabs-wrap">
     <div class="Tabs-block" id="description">
-        <h2>Megano Store Hystory
-        </h2>
+        <h2>Megano Store Hystory</h2>
     </div>
-    <div class="Tabs-block" id="sellers">
-    </div>
-    <div class="Tabs-block" id="addit">
-    </div>
+    <div class="Tabs-block" id="sellers"></div>
+    <div class="Tabs-block" id="addit"></div>
 
     <div class="Tabs-block" id="reviews">
         <header class="Section-header">
-            <h3 class="Section-title" id="review_count">
-                {{ object.reviews|filter_by:"is_active=True"| length }}
-                {{ object.reviews|filter_by:"is_active=True"|length|ru_pluralize:"отзыв,отзыва,отзывов" }}
+            <h3 class="Section-title" id="review-count">
+
+                <span id="review-count-number">{{ object.reviews|filter_by:"is_active=True"| length }}</span>
+                <span id="review-count-text">{{ object.reviews|filter_by:"is_active=True"|length|ru_pluralize:"отзыв,отзыва,отзывов" }}</span>
             </h3>
         </header>
         <div id="reviews-container">
@@ -21,18 +19,16 @@
             <div class="Comments">
                 <div class="Comment">
                     <div class="Comment-column Comment-column_pict">
-                        <div class="Comment-avatar">
-                        </div>
+                        <div class="Comment-avatar"></div>
                     </div>
                     <div class="Comment-column">
                         <header class="Comment-header">
                             <div>
-                                <strong class="Comment-title">{{ review.user.username }}
-                                </strong><span class="Comment-date"> {{ review.created_at|date:"F d / Y / H:i" }}</span>
+                                <strong class="Comment-title">{{ review.user.username }}</strong>
+                                <span class="Comment-date">{{ review.created_at|date:"F d / Y / H:i" }}</span>
                             </div>
                         </header>
-                        <div class="Comment-content"> {{ review.text }}
-                        </div>
+                        <div class="Comment-content">{{ review.text }}</div>
                     </div>
                 </div>
             </div>
@@ -47,13 +43,12 @@
 
         {% if user.is_authenticated %}
         <header class="Section-header Section-header_product">
-            <h3 class="Section-title">Добавить отзыв
-            </h3>
+            <h3 class="Section-title">Добавить отзыв</h3>
         </header>
         <div class="Tabs-addComment">
             <div id="error-messages" style="color: red;"></div>
 
-            <form id="review-form" class="form" action="{% url 'add_review' pk=object.pk %}" method="post">
+            <form id="review-form" class="form" method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <textarea class="form-textarea" name="text" id="review" placeholder="Отзыв"></textarea>
@@ -76,7 +71,7 @@
 </div>
 
 <script>
-<!--    Скрипт для добавления нового отзыва без обновления страницы-->
+    // Скрипт для добавления нового отзыва без обновления страницы
     document.getElementById('review-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const form = event.target;
@@ -126,7 +121,23 @@
                     </div>
                 </div>
             `;
+
             reviewsContainer.insertAdjacentHTML('afterbegin', reviewHtml);
+
+            const reviewCountElement = document.getElementById('review-count-number');
+            const reviewCountTextElement = document.getElementById('review-count-text');
+            reviewCountElement.innerHTML = data.review_count;
+
+            let pluralizedText;
+            if (data.review_count === 1) {
+                pluralizedText = 'отзыв';
+            } else if (data.review_count >= 2 && data.review_count <= 4) {
+                pluralizedText = 'отзыва';
+            } else {
+                pluralizedText = 'отзывов';
+            }
+            reviewCountTextElement.innerHTML = pluralizedText;
+
             form.reset();
             document.getElementById('error-messages').innerHTML = '';
 
@@ -150,7 +161,7 @@
         });
     });
 
-<!--    Скрипт для добавления кнопки "показать еще"-->
+    // Скрипт для добавления кнопки "показать еще"
     document.getElementById('load-more-button').addEventListener('click', function() {
         const objectId = {{ object.pk }};
         const offset = document.querySelectorAll('.Comments').length;
@@ -201,5 +212,3 @@
         });
     });
 </script>
-
-

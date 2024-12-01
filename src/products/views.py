@@ -22,11 +22,10 @@ def load_reviews(request, pk, offset):
     reviews = product.reviews.filter(is_active=True)[offset:offset+count_display]
     reviews_data = [
         {
-            "username": review.user.username,
-            "created_at": review.created_at.strftime('%B %d / %Y / %H:%M'),
-            "text": review.text
-        }
-        for review in reviews
+        "username": review.user.username,
+        "created_at": review.created_at.strftime('%B %d / %Y / %H:%M'),
+        "text": review.text
+        } for review in reviews
     ]
     return JsonResponse(
         {
@@ -47,10 +46,14 @@ def add_review(request, pk):
             review.product = product
             review.user = request.user
             review.save()
-            return JsonResponse({
-                'username': review.user.username,
-                'created_at': review.created_at.strftime('%B %d / %Y / %H:%M'),
-                'text': review.text
-            })
+            review_count = product.reviews.filter(is_active=True).count()
+            return JsonResponse(
+                {
+                    'username': review.user.username,
+                    'created_at': review.created_at.strftime('%B %d / %Y / %H:%M'),
+                    'text': review.text,
+                    'review_count': review_count
+                }
+            )
         messages.error(request, form.errors)
         return JsonResponse({'errors':form.errors}, status=400)
