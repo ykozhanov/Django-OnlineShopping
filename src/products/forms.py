@@ -17,6 +17,5 @@ class ReviewForm(forms.ModelForm):
             'text': {
                 'required': 'Пожалуйста, введите отзыв.',
                 'max_length': 'Отзыв слишком длинный.',
-                'min_length': 'Отзыв слишком короткий.',
             },
         }

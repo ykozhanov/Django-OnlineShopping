@@ -1,3 +1,7 @@
+from logging import raiseExceptions
+from xml.dom import ValidationErr
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.contrib.auth.models import User
@@ -190,10 +194,9 @@ class ReviewModel(models.Model):
     User = get_user_model()
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField(max_length=2000)
+    text = models.TextField(max_length=2000, verbose_name='Review text')
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, verbose_name="Review is active ")
 
     def __str__(self):
         return f'Review by {self.user.username} on {self.product.name}'
-

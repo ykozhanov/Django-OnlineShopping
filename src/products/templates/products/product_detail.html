@@ -24,8 +24,7 @@
             <span>Отзывы ({{ object.reviews|filter_by:"is_active=True"|length }})</span>
         </a>
     </div>
-<!--        % include 'products/add_review.html' %-->
-        {% include 'products/123.html' %}
+        {% include 'products/product_reviews.html' %}
     </div>
 </div>
 {% endblock %}
