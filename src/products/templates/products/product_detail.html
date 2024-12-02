@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
 
 {% include 'header-top.html' %}
@@ -24,6 +22,9 @@
             <span>Отзывы ({{ object.reviews|filter_by:"is_active=True"|length }})</span>
         </a>
     </div>
+    <div class="Tabs-wrap">
+        <div class="Tabs-block" id="description"></div>
+        <div class="Tabs-block" id="sellers"></div>
         {% include 'products/product_reviews.html' %}
     </div>
 </div>

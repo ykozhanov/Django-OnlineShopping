@@ -1,11 +1,9 @@
-from logging import raiseExceptions
-from xml.dom import ValidationErr
-
-from django.core.exceptions import ValidationError
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 def category_icon_directory_path(instance: 'Category', filename: str):
     return 'categories/category_{pk}/icon/{filename}'.format(
@@ -191,7 +189,6 @@ class ReviewModel(models.Model):
     """
     Review model
     """
-    User = get_user_model()
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(max_length=2000, verbose_name='Review text')
