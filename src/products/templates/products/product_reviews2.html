@@ -1,39 +1,14 @@
-{% load custom_filters %}
-
 <div class="Tabs-block" id="reviews">
     <header class="Section-header">
         <h3 class="Section-title" id="review-count">
-
-            <span id="review-count-number">{{ object.reviews|filter_by:"is_active=True"| length }}</span>
-            <span id="review-count-text">{{ object.reviews|filter_by:"is_active=True"|length|ru_pluralize:"отзыв,отзыва,отзывов" }}</span>
+            <span id="review-count-number"></span>
+            <span id="review-count-text"></span>
         </h3>
     </header>
-    <div id="reviews-container">
-        {% for review in object.reviews.all|filter_by:"is_active=True"|order_by:"-created_at"|slice:":5" %}
-        <div class="Comments">
-            <div class="Comment">
-                <div class="Comment-column Comment-column_pict">
-                    <div class="Comment-avatar"></div>
-                </div>
-                <div class="Comment-column">
-                    <header class="Comment-header">
-                        <div>
-                            <strong class="Comment-title">{{ review.user.username }}</strong>
-                            <span class="Comment-date">{{ review.created_at|date:"F d / Y / H:i" }}</span>
-                        </div>
-                    </header>
-                    <div class="Comment-content">{{ review.text }}</div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+    <div id="reviews-container"></div>
+    <div id="load-more-container" style="display: flex; justify-content: center; margin-top: 20px;">
+        <button id="load-more-button" class="btn btn_muted" style="display: none;">Показать еще</button>
     </div>
-
-    {% if object.reviews|filter_by:"is_active=True"|length > 5 %}
-    <div style="display: flex; justify-content: center;margin-top: 20px;">
-        <button id="load-more-button" class="btn btn_muted">Показать еще</button>
-    </div>
-    {% endif %}
 
     {% if user.is_authenticated %}
     <header class="Section-header Section-header_product">
@@ -41,7 +16,6 @@
     </header>
     <div class="Tabs-addComment">
         <div id="error-messages" style="color: red;"></div>
-
         <form id="review-form" class="form" method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -52,7 +26,6 @@
             </div>
         </form>
     </div>
-
     {% else %}
     <header class="Section-header Section-header_product">
         <h3 class="Section-title">
@@ -61,9 +34,81 @@
         </h3>
     </header>
     {% endif %}
+
 </div>
 
 <script>
+    document.getElementById('load-reviews-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        const objectId = {{ object.pk }};
+        const csrfToken = '{{ csrf_token }}';
+
+        fetch(`{% url 'load_reviews' pk=object.pk offset=0 %}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+
+            // Скрипт для отображения отзывов
+            const reviewsContainer = document.getElementById('reviews-container');
+            reviewsContainer.innerHTML = '';
+            data.reviews.forEach(review => {
+                const reviewHtml = `
+                    <div class="Comments">
+                        <div class="Comment">
+                            <div class="Comment-column Comment-column_pict">
+                                <div class="Comment-avatar"></div>
+                            </div>
+                            <div class="Comment-column">
+                                <header class="Comment-header">
+                                    <div>
+                                        <strong class="Comment-title">${review.username}</strong>
+                                        <span class="Comment-date">${review.created_at}</span>
+                                    </div>
+                                </header>
+                                <div class="Comment-content">${review.text}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                reviewsContainer.insertAdjacentHTML('beforeend', reviewHtml);
+            });
+
+            const reviewCountElement = document.getElementById('review-count-number');
+            const reviewCountTextElement = document.getElementById('review-count-text');
+            const reviewCount = data.review_count;
+            reviewCountElement.innerHTML = reviewCount;
+
+            let pluralizedText;
+            if (reviewCount === 1) {
+                pluralizedText = 'отзыв';
+            } else if (reviewCount >= 2 && reviewCount <= 4) {
+                pluralizedText = 'отзыва';
+            } else {
+                pluralizedText = 'отзывов';
+            }
+            reviewCountTextElement.innerHTML = pluralizedText;
+
+            const loadMoreButton = document.getElementById('load-more-button');
+            if (data.reviews.length >= 5) {
+                loadMoreButton.style.display = 'block';
+            } else {
+                loadMoreButton.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    });
+
     // Скрипт для добавления нового отзыва без обновления страницы
     document.getElementById('review-form').addEventListener('submit', function(event) {
         event.preventDefault();
@@ -133,7 +178,6 @@
 
             form.reset();
             document.getElementById('error-messages').innerHTML = '';
-
         })
         // Обработка ошибки валидации
         .catch(error => {
@@ -197,8 +241,9 @@
                 reviewsContainer.insertAdjacentHTML('beforeend', reviewHtml);
             });
 
+            const loadMoreButton = document.getElementById('load-more-button');
             if (!data.has_more) {
-                document.getElementById('load-more-button').style.display = 'none';
+                loadMoreButton.style.display = 'none';
             }
         })
         .catch(error => {
@@ -206,3 +251,4 @@
         });
     });
 </script>
+

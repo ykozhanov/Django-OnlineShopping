@@ -18,14 +18,14 @@
         <a class="Tabs-link" href="#addit">
             <span>Характеристика</span>
         </a>
-        <a class="Tabs-link" href="#reviews">
+        <a class="Tabs-link" href="#reviews" id="load-reviews-link">
             <span>Отзывы ({{ object.reviews|filter_by:"is_active=True"|length }})</span>
         </a>
     </div>
-    <div class="Tabs-wrap">
-        <div class="Tabs-block" id="description"></div>
-        <div class="Tabs-block" id="sellers"></div>
-        {% include 'products/product_reviews.html' %}
+        <div class="Tabs-wrap">
+            <div class="Tabs-block" id="description"></div>
+            <div class="Tabs-block" id="sellers"></div>
+        {% include 'products/product_reviews2.html' %}
     </div>
 </div>
 {% endblock %}

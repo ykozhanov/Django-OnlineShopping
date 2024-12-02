@@ -11,7 +11,7 @@ from .forms import ReviewForm
 
 class ProductDetailView(DetailView):
     model = Product
-
+    # template_name = 'products/product_reviews2.html'
 
 def load_reviews(request, pk, offset):
     """
@@ -19,7 +19,8 @@ def load_reviews(request, pk, offset):
     """
     count_display = 5
     product = get_object_or_404(Product, id=pk)
-    reviews = product.reviews.filter(is_active=True)[offset:offset+count_display]
+    reviews = product.reviews.filter(is_active=True).order_by("-created_at")[offset:offset+count_display]
+    review_count = product.reviews.filter(is_active=True).count()
     reviews_data = [
         {
         "username": review.user.username,
@@ -30,7 +31,8 @@ def load_reviews(request, pk, offset):
     return JsonResponse(
         {
             "reviews": reviews_data,
-            "has_more": product.reviews.filter(is_active=True).count() > offset + count_display
+            "has_more": product.reviews.filter(is_active=True).count() > offset + count_display,
+            'review_count': review_count
         }
     )
 
