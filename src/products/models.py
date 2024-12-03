@@ -1,16 +1,19 @@
+import os
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
 def category_icon_directory_path(instance: 'Category', filename: str):
-    return 'categories/category_{pk}/icon/{filename}'.format(
-        pk=instance.pk,
-        filename=filename,
+    file_extension: str = filename.split('.')[-1]
+    return 'categories/{id}.{extension}'.format(
+        id=instance.id,
+        extension=file_extension,
     )
 
 def product_image_directory_path(instance: 'Product', filename: str):
-    return 'products/product_{pk}/image/{filename}'.format(
-        pk=instance.pk,
-        filename=filename,
+    file_extension: str = filename.split('.')[-1]
+    return 'products/{id}.{extension}'.format(
+        id=instance.id,
+        extension=file_extension,
     )
 
 class Category(MPTTModel):
@@ -59,6 +62,21 @@ class Category(MPTTModel):
 
     def __str__(self):
         return f'{self.name}'
+    
+    def save(self, *args, **kwargs):
+        """Save method redefinition to firstly get category id and then get path to icon"""
+        is_new: bool = self.id is None
+        if not is_new:
+            old_icon = Category.objects.filter(pk=self.pk).first().icon
+            if old_icon and self.icon != old_icon:
+                if old_icon.path and os.path.exists(old_icon.path):
+                    os.remove(old_icon.path)
+        super().save(*args, **kwargs)
+        if is_new and self.icon:
+            new_icon_path: str = category_icon_directory_path(self, self.icon.name)
+            self.icon.storage.save(new_icon_path, self.icon.file)
+            self.icon.name = new_icon_path
+            super().save(update_fields=['icon'])
 
 
 class Product(models.Model):
@@ -109,6 +127,21 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+    
+    def save(self, *args, **kwargs):
+        """Save method redefinition to firstly get product id and then get path to icon"""
+        is_new: bool = self.id is None
+        if not is_new:
+            old_image = Product.objects.filter(pk=self.pk).first().image
+            if old_image and self.image != old_image:
+                if old_image.path and os.path.exists(old_image.path):
+                    os.remove(old_image.path)
+        super().save(*args, **kwargs)
+        if is_new and self.image:
+            new_image_path: str = product_image_directory_path(self, self.image.name)
+            self.image.storage.save(new_image_path, self.image.file)
+            self.image.name = new_image_path
+            super().save(update_fields=['image'])
 
 
 class Characteristic(models.Model):
