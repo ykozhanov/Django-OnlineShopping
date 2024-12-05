@@ -6,12 +6,12 @@ from django.contrib import messages
 from .models import Product
 from .forms import ReviewForm
 
-
 # Create your views here.
 
 class ProductDetailView(DetailView):
     model = Product
     # template_name = 'products/product_reviews2.html'
+
 
 def load_reviews(request, pk, offset):
     """
