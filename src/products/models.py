@@ -1,6 +1,9 @@
 import os
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 def category_icon_directory_path(instance: 'Category', filename: str):
     file_extension: str = filename.split('.')[-1]
@@ -212,3 +215,17 @@ class SiteSetting(models.Model):
             defaults={'value': default}
         )
         return setting.value
+
+
+class ReviewModel(models.Model):
+    """
+    Review model
+    """
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(max_length=2000, verbose_name='Review text')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="Review is active ")
+
+    def __str__(self):
+        return f'Review by {self.user.username} on {self.product.name}'
