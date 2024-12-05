@@ -17,15 +17,17 @@
             <form action="#">
                 {% csrf_token %}
                 <div>
+                    {{ form.email.errors }}
                     {{ form.email }}
                 </div>
                 <div>
+                    {{ form.password.errors }}
                     {{ form.password }}
                 </div>
                 <div>
                     <input type="submit" value="Войти" />
                 </div>
-                <a class="forgot-label" href="e-mail.html">Забыли пароль?</a>
+                <a class="forgot-label" href="{% url 'profiles:password_reset' %}">Забыли пароль?</a>
                 <a class="registr" href="{% url 'profiles:register' %}">
                     Регистрация
                 </a>
