@@ -8,11 +8,6 @@ from .forms import ReviewForm
 
 # Create your views here.
 
-class ProductDetailView(DetailView):
-    model = Product
-    # template_name = 'products/product_reviews2.html'
-
-
 def load_reviews(request, pk, offset):
     """
     View for loading a batch of reviews for a product
