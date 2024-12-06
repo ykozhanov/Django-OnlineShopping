@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.actions import delete_selected
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.utils.safestring import mark_safe
 
 from products.models import Category, Product
@@ -9,34 +11,57 @@ from .models import Seller, ProductSeller
 User = get_user_model()
 
 
+def has_moderators_groups(user):
+    if user.is_superuser:
+        return True
+    cache_key = f"user_groups_{user.id}"
+    groups = cache.get(cache_key)
+    if groups is None:
+        groups = list(user.groups.values_list('name', flat=True))
+        cache.set(cache_key, groups, 60)
+    return 'moderators' in groups
+
+
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    fields = ('user', 'name', 'phone', 'address', 'description', 'image', 'get_image', 'is_active')
+    fields = ['user', 'name', 'phone', 'address', 'description', 'image', 'get_image', 'is_active']
     list_display = ('id', 'name', 'phone', 'address', 'is_active', 'description', 'get_image', 'user')
     ordering = ('id', 'name', 'user', 'is_active')
     list_display_links = ('name', )
     search_fields = ('name', 'user__username')
     readonly_fields = ('get_image', )
+    actions = None
 
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """При создании seller установка текущего пользователя владельцем"""
-        if not request.user.has_perm('moderators'):
-            if db_field.name == "user":
-                kwargs["queryset"] = User.objects.filter(id=request.user.id)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    def get_fields(self, request, obj=None):
+        """Удаляет поле владелец товара если не moderators"""
+        if not has_moderators_groups(request.user):
+            if 'user' in self.fields:
+                self.fields.remove('user')
+        return self.fields
+
+
+    def has_delete_permission(self, request, obj=None):
+        """Удаляет кнопку delete из формы если не moderators"""
+        return has_moderators_groups(request.user)
 
 
     def has_add_permission(self, request):
-        """Убираем возможность создать seller если он уже создан"""
-        if request.user.has_perm('moderators'):
-            return True
-        return not Seller.objects.filter(user=request.user).exists()
+        """Позволяет moderators добавлять seller"""
+        return has_moderators_groups(request.user)
+
+
+    def get_actions(self, request):
+        """Добавляет delete_selected если moderators"""
+        actions = super().get_actions(request)
+        if has_moderators_groups(request.user):
+            actions['delete_selected'] = (delete_selected, 'delete_selected', 'Удалить выбранные')
+        return actions
 
 
     def get_queryset(self, request):
         """ Возвращает seller для отображения. У модератора возвращает список всех seller."""
-        if request.user.has_perm('moderators'):
+        if has_moderators_groups(request.user):
             return Seller.objects.all()
         else:
             return Seller.objects.filter(user=request.user)
@@ -50,31 +75,42 @@ class SellerAdmin(admin.ModelAdmin):
         return 'Нет изображения'
 
 
-    def get_form(self, request, obj=None, **kwargs):
-        """Автозаполнение для поля user при создании или редактировании seller текущим пользователем."""
-        form = super().get_form(request, obj, **kwargs)
-        if not obj:
-            form.base_fields['user'].initial = request.user
-        return form
-
-
 class ProductSellerForm(forms.ModelForm):
+    """Выбор products по установленной category"""
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=False,
-        label='Категория'
-    )
+        label='Категория')
+
 
     def __init__(self, *args, **kwargs):
-        """Выбор products по установленной category"""
         super().__init__(*args, **kwargs)
-        if self.is_bound and not self.is_valid():
-            category_id = self.data.get('category')
-            if category_id:
-                category = Category.objects.get(id=category_id)
-                descendants = category.get_descendants()
-                products = Product.objects.filter(category_id__in=[category_id] + [d.id for d in descendants])
-                self.fields['product'].queryset = products
+        self.user = getattr(self, 'current_user', None)
+        self.permissions()
+
+
+    def permissions(self):
+        self.get_products_for_category()
+        if not has_moderators_groups(self.user):
+            self.users_form()
+
+
+    def users_form(self):
+        """убирает отображение поля seller если не moderators"""
+        self.fields['seller'].initial = self.user.seller
+        self.fields['seller'].widget = forms.HiddenInput()
+
+
+    def get_products_for_category(self):
+        """возвращает products по установленной category при создании формы или ошибке валидации"""
+        category_id = self.data.get('category')
+        if category_id:
+            category = Category.objects.get(id=category_id)
+            descendants = category.get_descendants()
+            products = Product.objects.filter(
+                category_id__in=[category_id] + [d.id for d in descendants])
+            self.fields['product'].queryset =products
+
 
     class Meta:
         model = ProductSeller
@@ -85,50 +121,44 @@ class ProductSellerForm(forms.ModelForm):
 class ProductSellerAdmin(admin.ModelAdmin):
     form = ProductSellerForm
     change_form_template = 'admin/sellers/change_form.html'
-    list_display = ('id', 'product', 'product_category', 'price', 'seller', 'product_image')
+    list_display = ['id', 'product', 'product_category', 'price', 'seller', 'product_image']
     list_editable = ('price', )
     list_display_links = None
     search_fields = ('product__name', 'seller__name')
     list_per_page = 20
 
 
-    def has_add_permission(self, request):
-        """Убираем возможность создать product-seller если нет seller"""
-        if request.user.has_perm('moderators'):
-            return True
-        return Seller.objects.filter(user=request.user).exists()
+    def get_list_display(self, request):
+        """удаляет поле отображения seller если не moderators"""
+        if not has_moderators_groups(request.user):
+            if 'seller' in self.list_display:
+                self.list_display.remove('seller')
+        return self.list_display
 
 
     def get_queryset(self, request):
         """Возвращает список моделей product-seller для отображения."""
-        if request.user.has_perm('moderators'):
+        if has_moderators_groups(request.user):
             return ProductSeller.objects.all()
         return ProductSeller.objects.filter(seller__user=request.user)
 
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """Отсеивает список чужих seller у пользователя если он не модератор"""
-        if not request.user.has_perm('moderators'):
-            if db_field.name == "seller":
-                kwargs["queryset"] = Seller.objects.filter(user=request.user)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
     def get_form(self, request, obj=None, **kwargs):
-        """При добавлении товара установка seller текущего пользователя если не модератор"""
+        """передаёт текущего user в форму добавления товара"""
         form = super().get_form(request, obj, **kwargs)
-        if obj is None and not request.user.has_perm('moderators'):
-            form.base_fields['seller'].initial = Seller.objects.get(user=request.user)
+        form.current_user = request.user
         return form
 
 
     @admin.display(description='Изображение')
     def product_image(self, obj):
-        return obj.product.image.url if obj.product.image else "Нет изображения"
+        """возвращает изображение товара если есть"""
+        if obj.product.image:
+            return mark_safe(f'<img src="{obj.product.image.url}" width="50" height="50">')
+        return 'Нет изображения'
 
 
     @admin.display(description='Категория')
     def product_category(self, obj):
+        """возвращает категорию для товара"""
         return obj.product.category
-
-

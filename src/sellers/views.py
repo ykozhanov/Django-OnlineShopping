@@ -4,6 +4,7 @@ from products.models import Product, Category
 
 
 def get_products_for_category(request, category_id):
+    """возвращает products по установленной category при смене категории"""
     if category_id == 0:
         products = Product.objects.all().values('id', 'name')
     else:
