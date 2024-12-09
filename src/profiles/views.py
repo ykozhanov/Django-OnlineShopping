@@ -18,3 +18,11 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         """
         return self.request.user
 
+
+
+def user_profile_edit(request):
+    user = request.user
+    if request.method == 'GET':
+        return render(request, 'profiles/user_detail_edit.html', context={'user': user})
+    print(request.POST)
+    return render(request, 'profiles/user_detail_edit.html', context={'user': user})
