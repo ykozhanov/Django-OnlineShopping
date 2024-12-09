@@ -9,11 +9,11 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = get_user_model()
-    list_display = ('email', 'is_staff', 'is_active',)
+    list_display = ('email', 'is_staff', 'is_active', 'phone_number', 'avatar')
     list_filter = ('email', 'is_staff', 'is_active',)
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Personal info", {"fields": ("first_name", "last_name",)}),
+        ("Personal info", {"fields": ("first_name", "last_name",'phone_number', 'avatar')}),
         (
             "Permissions",
             {

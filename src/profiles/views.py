@@ -5,10 +5,16 @@ from django.views.generic import DetailView
 
 User = get_user_model()
 
-# Create your views here.
 
-class UserProfile(LoginRequiredMixin, DetailView):
+class UserProfileView(LoginRequiredMixin, DetailView):
+    """
+    View for display the profile of the currently logged-in user
+    """
     model = User
 
     def get_object(self):
+        """
+        Returns the currently logged-in user
+        """
         return self.request.user
+
