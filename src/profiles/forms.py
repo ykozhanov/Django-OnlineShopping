@@ -49,10 +49,10 @@ class CustomLoginForm(AuthenticationForm):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                raise forms.ValidationError("Ошибка при входе.")
+                raise forms.ValidationError("Неверный email.")
 
             if not user.check_password(password):
-                raise forms.ValidationError("Ошибка при входе.")
+                raise forms.ValidationError("Неверный пароль.")
 
             self.cleaned_data['user'] = user
         return self.cleaned_data
