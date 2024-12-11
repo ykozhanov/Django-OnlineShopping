@@ -1,10 +1,13 @@
-{% extends 'base.html' %}
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма изменения пользователя</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/jquery.inputmask.min.js' %}"></script>
+</head>
 
-{% block content %}
-    {% include 'header-top.html' %}
-    {% include 'header-main.html' %}
-    {% include 'header-search.html' %}
-    {% load static %}
+
 
     <div class="Middle Middle_top">
         <div class="Section Section_column Section_columnLeft">
@@ -113,10 +116,7 @@
             </div>
         </div>
     </div>
-    {% include 'footer.html' %}
-{% endblock %}
 
-{% block scripts %}
 <script>
     $(document).ready(function(){
         console.log('jQuery loaded:', typeof $ !== 'undefined');
@@ -128,6 +128,8 @@
             console.error('jQuery or Inputmask is not loaded');
         }
     });
-
+    
 </script>
-{% endblock %}
+    {% include 'footer.html' %}
+
+

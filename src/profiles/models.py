@@ -29,7 +29,7 @@ class User(AbstractUser):
         return self.email
 
     def save(self, *args, **kwargs):
-        """Save method redefinition to firstly get product id and then get path to icon"""
+        """Save method redefinition to firstly get user id and then get path to icon"""
         is_new: bool = self.id is None
         if not is_new:
             old_avatar = User.objects.filter(pk=self.pk).first().avatar
