@@ -1,12 +1,14 @@
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.urls import path
 from django_mptt_admin.admin import DjangoMpttAdmin
 from django.utils.html import format_html
+from django.shortcuts import render
 
 from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
 from .signals import clear_menu_cache_signal
+from importapp.forms import JSONImportForm
 
 
 @admin.action(description='Deactivate entities')
@@ -67,6 +69,7 @@ class ProductCharacteristicsInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Displaying products in damin panel"""
+    change_list_template = "products/products_changelist.html"
 
     actions = [
         mark_active,
@@ -106,6 +109,23 @@ class ProductAdmin(admin.ModelAdmin):
         """Creates shorrt description"""
         return obj.description if len(obj.description) < 48 else obj.description[:48] + '...'
 
+    def import_json(self, request: HttpRequest) -> HttpResponse:
+        form = JSONImportForm()
+        context = {
+            "form": form,
+        }
+        return render(request, "admin/json-form.html", context=context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        new_urls = [
+            path(
+                "import-products-json/",
+                self.import_json,
+                name="import_products_json",
+            ),
+        ]
+        return new_urls + urls
 
 @admin.register(Characteristic)
 class CharacteristicAdmin(admin.ModelAdmin):
