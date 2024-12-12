@@ -1,3 +1,8 @@
+from datetime import datetime
+from pathlib import Path
+
+from django.core.files.storage import FileSystemStorage
+from django.core.management import call_command
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
@@ -5,6 +10,7 @@ from django.urls import path
 from django_mptt_admin.admin import DjangoMpttAdmin
 from django.utils.html import format_html
 from django.shortcuts import render
+from django.conf import settings
 
 from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
 from .signals import clear_menu_cache_signal
@@ -114,6 +120,21 @@ class ProductAdmin(admin.ModelAdmin):
         context = {
             "form": form,
         }
+
+        import_dir = settings.MEDIA_ROOT / 'import_files'
+
+        if request.method == "POST":
+            form = JSONImportForm(request.POST, request.FILES)
+            if not form.is_valid():
+                return render(request, "admin/json-form.html", context=context, status=400)
+
+            json_file = form.files["json_file"].file
+            fs = FileSystemStorage(location=import_dir)
+            path_file = Path(fs.save(f"import_file_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{json_file.name}", json_file))
+
+            call_command("import_product", path_file=path_file, email=form.cleaned_data["email"])
+            return HttpResponse("Импорт начался")
+
         return render(request, "admin/json-form.html", context=context)
 
     def get_urls(self):
