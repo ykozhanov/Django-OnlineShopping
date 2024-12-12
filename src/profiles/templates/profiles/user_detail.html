@@ -3,6 +3,7 @@
     {% include 'header-top.html' %}
     {% include 'header-main.html' %}
     {% include 'header-search.html' %}
+    {% load static %}
     <div class="Middle Middle_top">
         <div class="Section Section_column Section_columnLeft">
             <div class="wrap">
@@ -27,8 +28,11 @@
                     <div class="Account">
                         <div class="Account-group">
                             <div class="Account-column">
-<!--                                Нужно отредактировать предварительно узнать делал ли кто возможность загружать фото-->
+                                {% if object.avatar %}
                                 <div class="Account-avatar"><img src="{{object.avatar.url}}" alt="card.jpg"/></div>
+                                {% else %}
+                                <div class="Account-avatar"><img src="{% static 'assets/img/content/home/card.jpg' %}" alt="card.jpg"/></div>
+                                {% endif %}
                             </div>
                             <div class="Account-column">
                                 <div class="Account-name">{{object.first_name}} {{object.last_name}} </div>
