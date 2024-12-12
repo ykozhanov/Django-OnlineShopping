@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django_mptt_admin",
     "products.apps.ProductsConfig",
     "profiles",
+    "importapp.apps.ImportappConfig",
 ]
 
 MIDDLEWARE = [
