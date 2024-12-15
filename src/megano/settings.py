@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
     "products.apps.ProductsConfig",
+    "cart.apps.CartConfig",
     "profiles",
 ]
 
