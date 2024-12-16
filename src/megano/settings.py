@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django_mptt_admin",
     "products.apps.ProductsConfig",
     "profiles",
+    "importapp.apps.ImportappConfig",
 ]
 
 MIDDLEWARE = [
@@ -145,3 +146,5 @@ AUTH_USER_MODEL = 'profiles.User'
 # EMAIL_HOST_USER = 'your_email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your_email_password'
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

@@ -1,12 +1,20 @@
+from datetime import datetime
+from pathlib import Path
+
+from django.core.files.storage import FileSystemStorage
+from django.core.management import call_command
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.urls import path
 from django_mptt_admin.admin import DjangoMpttAdmin
 from django.utils.html import format_html
+from django.shortcuts import render
+from django.conf import settings
 
 from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
 from .signals import clear_menu_cache_signal
+from importapp.forms import JSONImportForm
 
 
 @admin.action(description='Deactivate entities')
@@ -67,6 +75,7 @@ class ProductCharacteristicsInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Displaying products in damin panel"""
+    change_list_template = "products/products_changelist.html"
 
     actions = [
         mark_active,
@@ -106,6 +115,38 @@ class ProductAdmin(admin.ModelAdmin):
         """Creates shorrt description"""
         return obj.description if len(obj.description) < 48 else obj.description[:48] + '...'
 
+    def import_json(self, request: HttpRequest) -> HttpResponse:
+        form = JSONImportForm()
+        context = {
+            "form": form,
+        }
+
+        import_dir = settings.MEDIA_ROOT / 'import_files'
+
+        if request.method == "POST":
+            form = JSONImportForm(request.POST, request.FILES)
+            if not form.is_valid():
+                return render(request, "admin/json-form.html", context=context, status=400)
+
+            json_file = form.files["json_file"].file
+            fs = FileSystemStorage(location=import_dir)
+            path_file = Path(fs.save(f"import_file_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{json_file.name}", json_file))
+
+            call_command("import_product", path_file=path_file, email=form.cleaned_data["email"])
+            return HttpResponse("Импорт начался")
+
+        return render(request, "admin/json-form.html", context=context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        new_urls = [
+            path(
+                "import-products-json/",
+                self.import_json,
+                name="import_products_json",
+            ),
+        ]
+        return new_urls + urls
 
 @admin.register(Characteristic)
 class CharacteristicAdmin(admin.ModelAdmin):
