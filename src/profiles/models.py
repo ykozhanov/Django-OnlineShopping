@@ -1,24 +1,33 @@
 import os
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 
 from .managers import CustomUserManager
 
 def user_image_directory_path(instance: 'User', filename: str):
+    """Generates a file path for uploading user images"""
     file_extension: str = filename.split('.')[-1]
     return 'users/{id}.{extension}'.format(
         id=instance.id,
         extension=file_extension,
     )
 
+def validate_image_size(value):
+    """Validates that the file size does not exceed the specified maximum size in kilobytes"""
+    max_size_kb = 2 * 1024
+    if value.size > max_size_kb * 1024:
+        raise ValidationError(f'Max file size is {max_size_kb}sKB')
+
+
 class User(AbstractUser):
     phone_number_regex = RegexValidator(regex=r'^\d{10}$', message="Phone number must be 10 digits.")
     email = models.EmailField('email address', unique=True)
     is_seller = models.BooleanField(default=False)
     phone_number = models.CharField(validators=[phone_number_regex],max_length=10,blank= True, null=True)
-    avatar = models.ImageField(blank=True, null=True)
+    avatar = models.ImageField(blank=True, null=True, validators=[validate_image_size])
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

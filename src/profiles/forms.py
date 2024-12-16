@@ -20,7 +20,9 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('email',)
 
 
-class CustomUserChangeForm2(UserChangeForm):
+class CustomUserEditForm(UserChangeForm):
+
+    """Custom form for editing user profile information"""
 
     class Meta:
         model = User
