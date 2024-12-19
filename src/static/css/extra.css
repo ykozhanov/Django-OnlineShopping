@@ -18,6 +18,7 @@
 
 .Account-column_full {
     width: 100%;
+
 }
 
 .Account-column + .Account-column {
@@ -28,6 +29,7 @@
     .Account-column + .Account-column {
         margin-left: 0;
         margin-top: 20px;
+
     }
 }
 
