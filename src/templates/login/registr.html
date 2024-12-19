@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block meta %}
+    <meta name="description" content="Регистрация нового пользователя">
+{% endblock meta %}
+
+{% block header %}
+    {% include "header-top.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        <div class="header">
+            <h3 class="sign-in">Регистрация</h3>
+        </div>
+        <div class="clear"></div>
+        <form action="#" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                {{ form.username.errors }}
+                {{ form.username }}
+            </div>
+            <div>
+                {{ form.email.errors }}
+                {{ form.email }}
+            </div>
+            <div>
+                {{ form.password1.errors }}
+                {{ form.password1 }}
+            </div>
+            <input type="submit" value="Зарегистрироваться" />
+            <a class="registr" href="{% url 'profiles:login' %}">
+                Вход
+            </a>
+            <div class="clear"></div>
+        </form>
+    </div>
+{% endblock %}
