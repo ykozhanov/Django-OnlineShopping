@@ -1,0 +1,5 @@
+{% for banner in banners %}
+    <a href="{{ banner.link }}">
+        <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+    </a>
+{% endfor %}
