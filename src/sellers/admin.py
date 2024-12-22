@@ -62,7 +62,6 @@ class SellerAdmin(admin.ModelAdmin):
         """Возвращает изображение seller если оно есть."""
         if seller.image:
             return mark_safe(f'<img src="{seller.image.url}" width="50" height="50">')
-        return "Нет изображения"
 
 
 class ProductSellerForm(forms.ModelForm):
@@ -125,7 +124,6 @@ class ProductSellerAdmin(admin.ModelAdmin):
         """возвращает изображение товара если есть"""
         if obj.product.image:
             return mark_safe(f'<img src="{obj.product.image.url}" width="50" height="50">')
-        return "Нет изображения"
 
     @admin.display(description="Категория")
     def product_category(self, obj):
