@@ -612,7 +612,7 @@ var Profile = function(){
                     var file = input.files[0],
                         ext = 'неизвестно';
                     ext = file.name.split('.').pop();
-                    if (ext==='png' || ext==='jpg' || ext==='gif') {
+                    if (ext==='png' || ext==='jpg' || ext==='gif' || ext==='jpeg' ) {
                         var reader = new FileReader();
     
                         reader.onload = function(e) {
@@ -635,7 +635,7 @@ var Profile = function(){
                 } else {
                     if (!$thisAvatar.next('.form-error').length){
                         $thisAvatar.find('input[type="file"]').data('errorinput', true);
-                        $thisAvatar.after('<div class="form-error">Для загрузки допустимы лишь картинки с расширением png, jpg, gif</div>');
+                        $thisAvatar.after('<div class="form-error">Для загрузки допустимы лишь картинки с расширением png, jpg, gif, jpeg </div>');
                     }
                 };
             });

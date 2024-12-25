@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from megano import settings
+from xml.etree.ElementInclude import include
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -28,6 +29,8 @@ urlpatterns = [
     path("", include("sellers.urls")),
 
     path("__debug__/", include("debug_toolbar.urls")),
+    path('products/', include('products.urls')),
+    path("account/", include('profiles.urls'))
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

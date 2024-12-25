@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     "django_mptt_admin",
 
     "products.apps.ProductsConfig",
-    "profiles",
-    "sellers.apps.SellerConfig",
+    "profiles.apps.ProfilesConfig",
+    "importapp.apps.ImportappConfig",
 ]
 
 MIDDLEWARE = [
@@ -141,3 +141,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'uploads'
 
 AUTH_USER_MODEL = 'profiles.User'
+
+# TODO Обновить настройки почты
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.google.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your_email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your_email_password'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
