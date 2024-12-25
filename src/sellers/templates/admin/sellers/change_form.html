@@ -1,0 +1,24 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+          const categorySelect = document.getElementById('id_category');
+          const productSelect = document.getElementById('id_product');
+
+          categorySelect.addEventListener('change', function() {
+            const categoryId = this.value || '0';
+            fetch(`/get_products_for_category/${categoryId}/`)
+              .then(response => response.json())
+              .then(data => {
+                productSelect.innerHTML = '';
+                data.products.forEach(product => {
+                  const option = new Option(product.name, product.id);
+                  productSelect.add(option);
+                });
+              });
+          });
+        });
+    </script>
+{% endblock %}
