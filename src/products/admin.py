@@ -12,7 +12,7 @@ from django.utils.html import format_html
 from django.shortcuts import render
 from django.conf import settings
 
-from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
+from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel, ViewHistory
 from .signals import clear_menu_cache_signal
 from importapp.forms import JSONImportForm
 
@@ -199,3 +199,9 @@ class ReviewAdmin(admin.ModelAdmin):
         """Creates short text"""
         return obj.text if len(obj.text) < 48 else obj.text[:48] + '...'
 
+
+@admin.register(ViewHistory)
+class ViewHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'viewed_at')
+    list_filter = ('user', 'product', 'viewed_at')
+    search_fields = ('user__username', 'product__name')
