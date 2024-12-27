@@ -30,12 +30,11 @@
             <div class="row-block">
                 <div class="CartBlock">
 
-<!--                        Проверка авторизован ли пользователь-->
-<!--                  % if user.is_authenticated %-->
+                    {% if user.is_authenticated %}
                     <div class="dropdown">
                             <button class="dropbtn"><img class="CartBlock-img" src="{% static 'assets/img/icons/loon-icon.svg' %}" alt="loon-icon.svg" /></button>
                             <div class="dropdown-content">
-                                <a class="dropdown-content-a" href="#">Личный кабинет</a>
+                                <a class="dropdown-content-a" href="{% url 'profile' %}">Личный кабинет</a>
                                 <a class="dropdown-content-a" href="#">Административный раздел</a>
                                 <a class="dropdown-content-a" href="#">Выход</a>
                             </div>
@@ -49,7 +48,7 @@
                     </div>
 
 
-<!--                -       % else %-->
+                    {% else %}
                     <a class="CartBlock-block" href="#">
                         <img class="CartBlock-img" src="{% static 'assets/img/icons/cart.svg' %}" alt="cart.svg"/>
                         <span class="CartBlock-amount">0</span>
@@ -64,7 +63,7 @@
                         </div>
                     </div>
 
-<!--                 % endif %-->
+                 {% endif %}
                 </div>
             </div>
             <div class="row-block Header-trigger">

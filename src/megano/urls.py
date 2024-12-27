@@ -14,16 +14,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from xml.etree.ElementInclude import include
-
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+
+from megano import settings
+from xml.etree.ElementInclude import include
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+<<<<<<< HEAD
     path("profiles/", include("profiles.urls")),
     path('products/', include('products.urls')),
     path('cart/', include('cart.urls')),
@@ -31,3 +34,16 @@ urlpatterns = [
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+=======
+    path("", include("sellers.urls")),
+
+    path("__debug__/", include("debug_toolbar.urls")),
+    path('products/', include('products.urls')),
+    path("account/", include('profiles.urls'))
+]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+>>>>>>> develop

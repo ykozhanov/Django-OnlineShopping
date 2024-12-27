@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView
 from django.contrib import messages
 
 from .models import Product
