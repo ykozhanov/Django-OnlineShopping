@@ -30,7 +30,8 @@ urlpatterns = [
 
     path("__debug__/", include("debug_toolbar.urls")),
     path('products/', include('products.urls')),
-    path("account/", include('profiles.urls'))
+    path("account/", include('profiles.urls')),
+    path('banner/', include('banners.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
