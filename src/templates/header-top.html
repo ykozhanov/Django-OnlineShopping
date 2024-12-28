@@ -45,7 +45,7 @@
                             <!-- Проверка авторизован ли пользователь -->
 
                              {% if user.is_authenticated %}
-                            <a class="ControlPanel-title" href="{% url 'profile' %}">Личный кабинет</a>
+                            <a class="ControlPanel-title" href="{% url 'profiles:profile' %}">Личный кабинет</a>
                              {% else %}
                             <a class="ControlPanel-title" href="#">Вход</a>
                             <a class="ControlPanel-title" href="#">Регистрация</a>

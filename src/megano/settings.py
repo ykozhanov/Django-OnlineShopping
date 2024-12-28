@@ -41,14 +41,12 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
 
-    "products.apps.ProductsConfig",
-<<<<<<< HEAD
-    "cart.apps.CartConfig",
-    "profiles",
-=======
     "profiles.apps.ProfilesConfig",
     "importapp.apps.ImportappConfig",
->>>>>>> develop
+    "products.apps.ProductsConfig",
+    "cart.apps.CartConfig",
+    "sellers.apps.SellerConfig",
+
 ]
 
 MIDDLEWARE = [

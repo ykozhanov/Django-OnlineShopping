@@ -36,8 +36,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
-<<<<<<< HEAD
-=======
 
     def save(self, *args, **kwargs):
         """Save method redefinition to firstly get user id and then get path to icon"""
@@ -53,4 +51,3 @@ class User(AbstractUser):
             self.avatar.storage.save(new_avatar_path, self.avatar.file)
             self.avatar.name = new_avatar_path
             super().save(update_fields=['avatar'])
->>>>>>> develop

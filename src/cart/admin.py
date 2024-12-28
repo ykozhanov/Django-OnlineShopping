@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 
 from .models import Cart, CartItem
-from .models import FakeProductSeller
+from .models import ProductSeller
 
 
 User = get_user_model()
@@ -62,28 +62,28 @@ class CartItemAdmin(admin.ModelAdmin):
     get_cart_ref.short_description = 'Cart'
     get_product_seller_ref.short_description = 'Product of seller'
 
-@admin.register(FakeProductSeller)
-class FakeProductSellerAdmin(admin.ModelAdmin):
-    """FAKEFAKEFAKE"""
+# @admin.register(FakeProductSeller)
+# class FakeProductSellerAdmin(admin.ModelAdmin):
+#     """FAKEFAKEFAKE"""
 
-    list_display = 'pk', 'get_product_ref', 'get_seller_ref', 'price'
-    ordering = ('pk', )
-    # search_fields = 'user__email', 'price'
+#     list_display = 'pk', 'get_product_ref', 'get_seller_ref', 'price'
+#     ordering = ('pk', )
+#     # search_fields = 'user__email', 'price'
 
-    # fieldsets = [
-    #     (None, {
-    #         'fields': ('user', 'session_id', 'created_at'),
-    #     })
-    # ]
-    def get_product_ref(self, obj):
-        """Get related product ref"""
-        url = f'/admin/{obj.product._meta.app_label}/{obj.product._meta.model_name}/{obj.product.pk}/'
-        return format_html('<a href="{}">{}</a>', url, obj.product)
+#     # fieldsets = [
+#     #     (None, {
+#     #         'fields': ('user', 'session_id', 'created_at'),
+#     #     })
+#     # ]
+#     def get_product_ref(self, obj):
+#         """Get related product ref"""
+#         url = f'/admin/{obj.product._meta.app_label}/{obj.product._meta.model_name}/{obj.product.pk}/'
+#         return format_html('<a href="{}">{}</a>', url, obj.product)
     
-    def get_seller_ref(self, obj):
-        """Get related seller ref"""
-        url = f'/admin/{obj.seller._meta.app_label}/{obj.seller._meta.model_name}/{obj.seller.pk}/'
-        return format_html('<a href="{}">{}</a>', url, obj.seller)
+#     def get_seller_ref(self, obj):
+#         """Get related seller ref"""
+#         url = f'/admin/{obj.seller._meta.app_label}/{obj.seller._meta.model_name}/{obj.seller.pk}/'
+#         return format_html('<a href="{}">{}</a>', url, obj.seller)
 
-    get_product_ref.short_description = 'Product'
-    get_seller_ref.short_description = 'Seller'
+#     get_product_ref.short_description = 'Product'
+#     get_seller_ref.short_description = 'Seller'
