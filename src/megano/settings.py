@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "profiles.apps.ProfilesConfig",
     "importapp.apps.ImportappConfig",
     "banners",
+    "comparison.apps.ComparisonConfig",
 ]
 
 MIDDLEWARE = [
