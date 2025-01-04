@@ -26,7 +26,11 @@ class Seller(models.Model):
 
 class ProductSeller(models.Model):
     PAYMENT_CHOICES = [("CARD", "Онлайн картой"), ("CASH", "Наличными")]
-    DELIVERY_CHOICES = [("STANDARD", "Обычная доставка"), ("EXPRESS", "Быстрая доставка")]
+    DELIVERY_CHOICES = [
+        ("STANDARD", "Обычная доставка"),
+        ("EXPRESS", "Быстрая доставка"),
+        ("FREE", "Бесплатная доставка"),
+    ]
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="sellers", verbose_name="Товар")
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name="products", verbose_name="Продавец")
@@ -35,6 +39,7 @@ class ProductSeller(models.Model):
         max_length=10, choices=DELIVERY_CHOICES, verbose_name="Тип доставки", default="STANDARD"
     )
     payment_type = models.CharField(max_length=50, choices=PAYMENT_CHOICES, verbose_name="Тип оплаты", default="CARD")
+    quantity = models.IntegerField(verbose_name="Количество товара", default=0)
 
     class Meta:
         unique_together = ("product", "seller")

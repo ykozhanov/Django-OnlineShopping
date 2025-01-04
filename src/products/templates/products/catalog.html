@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load custom_simple_tag %}
+
+{% block content %}
+
+{% include 'header-top.html' %}
+{% include 'header-main.html' %}
+{% include 'header-search.html' %}
+
+    <div class="Middle Middle_top">
+        <div class="Section Section_column Section_columnLeft">
+            <div class="wrap">
+                <div class="Section-column">
+                    <div class="Section-columnSection">
+                        <header class="Section-header">
+                            <strong class="Section-title">Фильтр
+                            </strong>
+                        </header>
+                        <div class="Section-columnContent">
+                            <form class="form" action="#" method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <div class="range Section-columnRange">
+                                        <input class="range-line" id="price" name="price" type="text" data-type="double" data-min="{{ data_min }}" data-max="{{ data_max }}" data-from="{{ data_from }}" data-to="{{ data_to }}" />
+                                        <div class="range-price">Цена:&#32;
+                                            <div class="rangePrice">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input class="form-input form-input_full" id="title" name="title" type="text" placeholder="{% if title %} {{ title }} {% else %} Название {% endif %}" />
+                                        </div>
+                                        <div class="form-group">
+                                            <!-- - var options = setOptions(items, ['value', 'selected', 'disabled']);-->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="toggle">
+                                                <input type="checkbox" name="in_stock" {% if in_stock %}checked{% endif %} /><span class="toggle-box"></span><span class="toggle-text">Только товары в наличии</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="toggle">
+                                                <input type="checkbox" id="freeShipping" name="free_shipping" {% if free_shipping %}checked{% endif %} /><span class="toggle-box"></span><span class="toggle-text">С бесплатной доставкой</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-group">
+                                    <div class="buttons"><button class="btn btn_square btn_dark btn_narrow" type="submit">Фильтр</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="Section-columnSection">
+                        <header class="Section-header">
+                            <strong class="Section-title">Популярные тэги
+                            </strong>
+                        </header>
+                        <div class="Section-columnContent">
+                            <div class="buttons"><a class="btn btn_default btn_sm" href="#">Видео</a><a class="btn btn_default btn_sm" href="#">Разработка</a><a class="btn btn_default btn_sm" href="#">Игры</a><a class="btn btn_default btn_sm" href="#">Asus</a><a class="btn btn_default btn_sm" href="#">Разработка</a><a class="btn btn_default btn_sm" href="#">Видео</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="Section-content">
+                    <div class="Sort">
+                        <div class="Sort-title">Сортировать по:
+                        </div>
+                        <div class="Sort-variants">
+                            {% for key, value in single_filters.items %}
+                                <a class="Sort-sortBy {% if value == 'desc' %}Sort-sortBy_dec{% elif value == 'asc' %}Sort-sortBy_inc{% endif %}"
+                                    href="?page={{ page_obj.number }}{% update_request_params value key request_params %}">
+                                    {% if key == 'popularity' %}Популярности{% elif key == 'avg_price' %}Цене{% elif key == 'reviews' %}Отзывам{% elif key == 'created_at' %}Новизне{% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="Cards">
+                        {% for product in object_list %}
+                            <div class="Card"><a class="Card-picture" href="#"><img src="{% static product.image %}" alt="card.jpg" /></a>
+                                <div class="Card-content">
+                                    <strong class="Card-title"><a href="product.html">{{ product.name }}</a>
+                                    </strong>
+                                    <div class="Card-description">
+                                        <div class="Card-cost"><span class="Card-price">{{ product.avg_price }}</span>
+                                        </div>
+                                        <div class="Card-category">{{ product.category }}
+                                                {% if product.category_parent %}
+                                                    / {{ product.category_parent }}
+                                                {% endif %}
+                                        </div>
+                                        <div class="Card-hover"><a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% block navigation %}
+                    <div class="Pagination">
+                        <div class="Pagination-ins">
+                            {% if page_obj.number > 1 %}
+                                <a class="Pagination-element Pagination-element_prev" href="?page={{ page_obj.previous_page_number }}{{ request_params }}">
+                                    <img src="{% static 'assets/img/icons/prevPagination.svg' %}" alt="prevPagination.svg" />
+                                </a>
+                            {% endif %}
+
+                            {% if page_obj.number|add:-2 > 1 %}
+                                <a class="Pagination-element" href="?page=1{{ request_params }}">
+                                    <span class="Pagination-text">1</span>
+                                </a>
+                                {% if page_obj.number|add:-2 > 2 %}
+                                    <span class="Pagination-text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% endif %}
+                            {% endif %}
+
+                            {% for page in paginator.page_range %}
+                                {% if page >= page_obj.number|add:-2 and page <= page_obj.number|add:2 %}
+                                    {% if page == page_obj.number %}
+                                        <a class="Pagination-element Pagination-element_current" href="?page={{ page }}{{ request_params }}">
+                                            <span class="Pagination-text">{{ page }}</span>
+                                        </a>
+                                    {% else %}
+                                        <a class="Pagination-element" href="?page={{ page }}{{ request_params }}">
+                                            <span class="Pagination-text">{{ page }}</span>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if paginator.num_pages > page_obj.number|add:2 %}
+                                {% if paginator.num_pages > page_obj.number|add:3 %}
+                                    <span class="Pagination-text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% endif %}
+                                <a class="Pagination-element" href="?page={{ paginator.num_pages }}{{ request_params }}">
+                                    <span class="Pagination-text">{{ paginator.num_pages }}</span>
+                                </a>
+                            {% endif %}
+
+                            {% if page_obj.number < paginator.num_pages %}
+                                <a class="Pagination-element Pagination-element_next" href="?page={{ page_obj.next_page_number }}{{ request_params }}">
+                                    <img src="{% static 'assets/img/icons/nextPagination.svg' %}" alt="nextPagination.svg" />
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% include 'footer.html' %}
+
+{% endblock %}

@@ -32,6 +32,26 @@ class Command(BaseCommand):
                 "is_active": True,
                 "user_id": 2,
             },
+            {
+                "name": "Магнит",
+                "description": "Описание Магнит",
+                "image": "магнит.jpg",
+                "phone": "+7 777 333-23-33",
+                "address": "Адрес Магнит",
+                "email": "mag@mag.ru",
+                "is_active": True,
+                "user_id": 3,
+            },
+            {
+                "name": "x5",
+                "description": "Описание X5",
+                "image": "x5.jpg",
+                "phone": "+7 050 050-05-05",
+                "address": "Адрес X5",
+                "email": "x5@x5.ru",
+                "is_active": True,
+                "user_id": 4,
+            },
         ]
         for seller_data in sellers_data:
             seller, created = Seller.objects.get_or_create(
