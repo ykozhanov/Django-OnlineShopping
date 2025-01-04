@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.simple_tag
-def update_request_params(value, key, request_params):
+def update_request_params(value: str, key: str, request_params: str) -> str:
     """Обновление request_params"""
     if value == "asc":
         new_value = "desc"

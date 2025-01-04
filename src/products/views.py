@@ -1,7 +1,8 @@
+from typing import Any, Dict
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views import generic
@@ -98,7 +99,7 @@ class CatalogView(ListView):
         self.filter_params = dict()
         self.sort_params = dict()
 
-    def get_queryset(self):
+    def get_queryset(self) -> list[dict[str, Any]]:
         """Получение списка продуктов по категориям из кеша и применение фильтров"""
         cached_data = self.product_cache_service.get_products_by_category()
         filters = self.fetch_filter_params()
@@ -106,7 +107,7 @@ class CatalogView(ListView):
 
         return FilterService.process_products(products=cached_data, keys_for_sort=keys_for_sort, filters=filters)
 
-    def get_sort_keys(self):
+    def get_sort_keys(self) -> list[tuple[str, bool]]:
         """Получение параметров сортировки из GET запроса и создание ключей сортировки с возможностью реверса"""
         self.sort_params = {key: value for key, value in self.request.GET.items() if key in self.single_filters}
         keys_for_sort = []
@@ -117,7 +118,7 @@ class CatalogView(ListView):
             keys_for_sort.append((key, reverse))
         return keys_for_sort
 
-    def fetch_filter_params(self):
+    def fetch_filter_params(self) -> dict[str, Any]:
         """
         Извлечение параметров фильтрации
 
@@ -158,7 +159,7 @@ class CatalogView(ListView):
 
         return self.update_context(context=context)
 
-    def create_pagination_context(self, object_list):
+    def create_pagination_context(self, object_list: list[dict[str, Any]]) -> dict[str, Any]:
         """Создает контекст для новой пагинации с первой страницей."""
         paginator = Paginator(object_list=object_list, per_page=self.paginate_by)
         page_number = 1
@@ -166,12 +167,12 @@ class CatalogView(ListView):
 
         return {"page_obj": page_obj, "object_list": page_obj.object_list, "paginator": paginator}
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         context = self.get_context_data(**kwargs)
 
         return render(request, self.template_name, context)
 
-    def update_context(self, context):
+    def update_context(self, context) -> Dict[str, Any]:
         """
         Установка значений фильтров в context, создание строки с параметрами фильтров для возврата на бекенд
 

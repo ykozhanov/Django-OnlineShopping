@@ -5,7 +5,7 @@ from typing import Any, List, Tuple
 class FilterService:
 
     @staticmethod
-    def group_and_average(products) -> List[dict[str, Any]]:
+    def group_and_average(products: List[dict[str, Any]]) -> List[dict[str, Any]]:
         """Группирует данные по product.name и вычисляет среднюю цену для каждой группы"""
         grouped_products = defaultdict(list)
         for product in products:
@@ -26,7 +26,7 @@ class FilterService:
         return products
 
     @staticmethod
-    def filter_products(filters, products):
+    def filter_products(filters: dict[str, Any], products: List[dict[str, Any]]) -> List[dict[str, Any]]:
         """Фильтрует данные по заданным параметрам"""
         if "data_from" in filters:
             filters["data_from"] = float(filters["data_from"])
@@ -46,7 +46,9 @@ class FilterService:
         return filtered_products
 
     @staticmethod
-    def process_products(products, keys_for_sort, filters):
+    def process_products(
+        products: List[dict[str, Any]], keys_for_sort: List[Tuple[str, bool]], filters: dict[str, Any]
+    ) -> List[dict[str, Any]]:
         """Вызов функций фильтрации, сортировки и группировки"""
         filtered_products = FilterService.filter_products(filters=filters, products=products)
         grouped_products = FilterService.group_and_average(products=filtered_products)

@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 
 from django.core.cache import cache
-from django.db.models import Min, Max, F
+from django.db.models import Min, Max, F, QuerySet
 
 from products.models import Category
 from sellers.models import ProductSeller
@@ -12,7 +12,7 @@ class ProductCacheService:
         self.max_price = 0
         self.min_price = 0
 
-    def get_products_from_db(self, category_name):
+    def get_products_from_db(self, category_name: str) -> QuerySet[Dict[str, any]]:
         """Получает продукты из базы данных по имени категории."""
         queryset = (
             ProductSeller.objects.filter(
@@ -42,7 +42,7 @@ class ProductCacheService:
         )
         return queryset
 
-    def cache_products_by_category(self, category_name):
+    def cache_products_by_category(self, category_name: str) -> Dict[str, Any]:
         """
         Получает с базы данных продукты по имени категории, высчитывает часто используемые параметры и сохраняет в кэш.
         """
