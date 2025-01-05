@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import TemplateView
 
+from cart.cart_manager import CartManager
 from cart.models import Cart, CartItem
 
 class CartView(TemplateView):
@@ -11,7 +12,7 @@ class CartView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart, created = Cart.objects.get_or_create(user=self.request.user)
+        cart = CartManager(request=self.request).cart
         cart_items = cart.items.select_related('product_seller__product', 'product_seller__seller')
         total_price = cart_items.aggregate(
             total=Sum(F('quantity') * F('product_seller__price'))

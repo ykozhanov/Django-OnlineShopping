@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
 from django.db import models
 
 from sellers.models import ProductSeller
@@ -13,14 +14,17 @@ class Cart(models.Model):
         User,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         verbose_name='Related user',
         related_name='cart',
     )
-    session_id = models.CharField(
-        max_length=255,
+    session = models.OneToOneField(
+        Session,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name='Session id for no-autorized user',
+        verbose_name='Session for no-autorized user',
+        related_name='cart',
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -31,7 +35,7 @@ class Cart(models.Model):
         if self.user:
             return f'Cart of {self.user.email}'
         else:
-            return f'Cart of session {self.session_id}'
+            return f'Cart of session {self.session.session_key}'
 
 
 # from products.models import Product
