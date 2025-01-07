@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
