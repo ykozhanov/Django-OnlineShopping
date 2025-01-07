@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-tbdyk+fvh3aym&#g4&%49k96ru0amx%fbjeov(abim0+zuzm56
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", 'localhost', '0.0.0.0']
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition
@@ -154,3 +154,5 @@ AUTH_USER_MODEL = "profiles.User"
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24

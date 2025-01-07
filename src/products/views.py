@@ -90,7 +90,7 @@ class SellerDetailView(generic.DetailView):
 class CatalogView(ListView):
     template_name = "products/catalog.html"
     context_object_name = "object_list"
-    paginate_by = 3
+    paginate_by = 8
     single_filters = ("popularity", "avg_price", "reviews", "created_at")
     form_fields = ("in_stock", "free_shipping", "data_to", "data_from", "title")
 
@@ -127,12 +127,14 @@ class CatalogView(ListView):
         request.POST: Извлечение параметров из формы левого фильтра в self.filter_params
         request.GET: Извлечение параметров из GET запроса в self.filter_params
         """
+        print(self.request.POST)
         if self.request.method == "POST":
-            data_from, data_to = self.request.POST["price"].split(";")
-            if int(data_from) != self.product_cache_service.min_price:
-                self.filter_params["data_from"] = data_from
-            if int(data_to) != self.product_cache_service.max_price:
-                self.filter_params["data_to"] = data_to
+            if "price" in self.request.POST:
+                data_from, data_to = self.request.POST["price"].split(";")
+                if int(data_from) != self.product_cache_service.min_price:
+                    self.filter_params["data_from"] = data_from
+                if int(data_to) != self.product_cache_service.max_price:
+                    self.filter_params["data_to"] = data_to
             if "title" in self.request.POST and self.request.POST["title"] != "":
                 self.filter_params["title"] = self.request.POST["title"]
             exclude_fields = (

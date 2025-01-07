@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Union
 from django.core.cache import cache
 from django.db.models import Min, Max, F, QuerySet
 
+from megano import settings
 from sellers.models import ProductSeller
 
 
@@ -72,7 +73,7 @@ class ProductCacheService:
                 "max_price": aggregation["max_price"],
             }
 
-            cache.set(cache_key, cached_data, timeout=60 * 60 * 24)
+            cache.set(cache_key, cached_data, timeout=settings.PRODUCT_CACHE_TIMEOUT)
 
         return cached_data
 
