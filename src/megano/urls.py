@@ -19,14 +19,14 @@ from django.contrib import admin
 from django.urls import path, include
 
 from megano import settings
-from xml.etree.ElementInclude import include
+
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("sellers.urls")),
+    path("sellers/", include("sellers.urls")),
 
     path("__debug__/", include("debug_toolbar.urls")),
     path('products/', include('products.urls')),

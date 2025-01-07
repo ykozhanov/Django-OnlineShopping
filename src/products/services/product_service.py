@@ -1,19 +1,29 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 from django.core.cache import cache
 from django.db.models import Min, Max, F, QuerySet
 
-from products.models import Category
 from sellers.models import ProductSeller
 
 
+def get_product_cache_service(category_service):
+    return ProductCacheService(category_service=category_service)
+
+
 class ProductCacheService:
-    def __init__(self):
+    def __init__(self, category_service):
+        self.category_service = category_service
         self.max_price = 0
         self.min_price = 0
 
-    def get_products_from_db(self, category_name: str) -> QuerySet[Dict[str, any]]:
-        """Получает продукты из базы данных по имени категории."""
+    def get_min_price(self):
+        return self.min_price
+
+    def get_max_price(self):
+        return self.max_price
+
+    def get_products_from_db(self, category_name: str) -> Union[QuerySet[Dict[str, any]], list]:
+        """Получает products из базы данных по имени категории."""
         queryset = (
             ProductSeller.objects.filter(
                 seller__is_active=True,
@@ -44,13 +54,17 @@ class ProductCacheService:
 
     def cache_products_by_category(self, category_name: str) -> Dict[str, Any]:
         """
-        Получает с базы данных продукты по имени категории, высчитывает часто используемые параметры и сохраняет в кэш.
+        Получает с базы данных products по имени категории, высчитывает часто используемые параметры
+        и сохраняет в кэш вместе с products.
         """
         cache_key = f"products_in_category_{category_name}"
         cached_data = cache.get(cache_key)
         if cached_data is None:
             products_queryset = self.get_products_from_db(category_name)
-            aggregation = products_queryset.aggregate(min_price=Min("price"), max_price=Max("price"))
+            if len(products_queryset):
+                aggregation = products_queryset.aggregate(min_price=Min("price"), max_price=Max("price"))
+            else:
+                aggregation = {"min_price": 0, "max_price": 0}
 
             cached_data = {
                 "products": list(products_queryset),
@@ -72,13 +86,14 @@ class ProductCacheService:
 
         return merged_category_data
 
-    def get_products_by_category(self, category_name: str = None) -> List[Dict[str, Any]]:
+    def get_products_by_category(self, category_name: str) -> List[Dict[str, Any]]:
         """Возвращает кэшированные список products из входящей категории и её наследников"""
-        if not category_name:
-            categories_with_products = Category.objects.filter(products__isnull=False).distinct()
-            categories = [category for category in categories_with_products]
-        else:
-            categories = Category.objects.get(name=category_name)
-        categories_with_products = [self.cache_products_by_category(category.name) for category in categories]
+        all_categories = self.category_service.get_active_categories()
+        category = [category for category in all_categories if category.name == category_name]
+        if category:
+            categories = self.category_service.get_childrens_by_parent(parent=category[0])
+            categories_with_products = [self.cache_products_by_category(category.name) for category in categories]
 
-        return self.merge_products_categories(categories_with_products)
+            return self.merge_products_categories(categories_with_products)
+
+        return []

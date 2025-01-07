@@ -8,10 +8,11 @@ from django.contrib import messages
 from django.views import generic
 from django.views.generic import ListView
 
-from .cache_services import ProductCacheService
-from .filters import FilterService
+from .filter_service import FilterService
 from .models import Product
 from .forms import ReviewForm
+from .services.category_service import get_category_service
+from .services.product_service import get_product_cache_service
 
 
 def load_reviews(request, pk, offset):
@@ -93,15 +94,16 @@ class CatalogView(ListView):
     single_filters = ("popularity", "avg_price", "reviews", "created_at")
     form_fields = ("in_stock", "free_shipping", "data_to", "data_from", "title")
 
-    def __init__(self):
+    def __init__(self, category_service=get_category_service()):
         super().__init__()
-        self.product_cache_service = ProductCacheService()
+        self.category_service = category_service
+        self.product_cache_service = get_product_cache_service(category_service=self.category_service)
         self.filter_params = dict()
         self.sort_params = dict()
 
     def get_queryset(self) -> list[dict[str, Any]]:
         """Получение списка продуктов по категориям из кеша и применение фильтров"""
-        cached_data = self.product_cache_service.get_products_by_category()
+        cached_data = self.product_cache_service.get_products_by_category(category_name=self.kwargs.get("category"))
         filters = self.fetch_filter_params()
         keys_for_sort = self.get_sort_keys()
 
@@ -133,20 +135,24 @@ class CatalogView(ListView):
                 self.filter_params["data_to"] = data_to
             if "title" in self.request.POST and self.request.POST["title"] != "":
                 self.filter_params["title"] = self.request.POST["title"]
-            exclude_fields = ("data_from", "data_to", "title")
+            exclude_fields = (
+                "data_from",
+                "data_to",
+                "title",
+            )
             self.update_filter_params(request_data=self.request.POST, exclude_fields=exclude_fields)
         elif self.request.method == "GET":
-            self.update_filter_params(request_data=self.request.GET, exclude_fields=[])
+            self.update_filter_params(request_data=self.request.GET, exclude_fields=tuple())
 
         return self.filter_params
 
-    def update_filter_params(self, request_data, exclude_fields):
+    def update_filter_params(self, request_data: dict[str, Any], exclude_fields: tuple[str, ...]) -> None:
         """Обновление параметров фильтров из request_data"""
         self.filter_params.update(
             {k: v for k, v in request_data.items() if k in self.form_fields and k not in exclude_fields}
         )
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
         """
         get запрос возвращает контекст с текущей страницей пагинации
         post запрос создаёт новый пагинатор и сбрасывает страницу на первую
@@ -172,7 +178,7 @@ class CatalogView(ListView):
 
         return render(request, self.template_name, context)
 
-    def update_context(self, context) -> Dict[str, Any]:
+    def update_context(self, context: dict[str, Any]) -> dict[str, Any]:
         """
         Установка значений фильтров в context, создание строки с параметрами фильтров для возврата на бекенд
 
@@ -184,8 +190,8 @@ class CatalogView(ListView):
         context["request_params"] += "&" + urlencode(self.sort_params) if self.sort_params else ""
         single_filters = {key: self.request.GET[key] if key in self.request.GET else "" for key in self.single_filters}
         context["single_filters"] = single_filters
-        context["data_min"] = self.product_cache_service.min_price
-        context["data_max"] = self.product_cache_service.max_price
+        context["data_min"] = self.product_cache_service.get_min_price()
+        context["data_max"] = self.product_cache_service.get_max_price()
         context.update(self.filter_params)
-
+        context["active_category_list"] = self.category_service.get_active_categories()
         return context
