@@ -1,3 +1,5 @@
+import re
+
 from django import template
 
 register = template.Library()
@@ -38,3 +40,12 @@ def order_by(queryset, args):
     """
     args = [x.strip() for x in args.split(',')]
     return queryset.order_by(*args)
+
+
+@register.filter()
+def split_sentence(value):
+    """
+    Split the text into sentences based on .!?
+    """
+    sentence = re.split(r"(?<=[.!?]) +", value)
+    return sentence

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'header-top.html' %}
+    {% include 'header-main.html' %}
+    {% include 'header-search.html' %}
+    {% load static %}
+    {% load custom_filters %}
+
+    <div class="Middle Middle_top">
+        <div class="Section">
+            <div class="wrap">
+                <div class="Product">
+                    <div class="ProductCard">
+                        <div class="ProductCard-look">
+                            <div class="ProductCard-photo">
+                                <img src="{{product.image.url}}"  alt="bigGoods.png" />
+                            </div>
+                            <div class="ProductCard-picts">
+<!--                                <a class="ProductCard-pict ProductCard-pict_ACTIVE" href="{% static 'assets/img/content/home/bigGoods.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/bigGoods.png' %}" alt="bigGoods.png" />-->
+<!--                                </a>-->
+<!--                                <a class="ProductCard-pict" href="{% static 'assets/img/content/home/slider.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/slider.png' %}" alt="slider.png" />-->
+<!--                                </a>-->
+<!--                                <a class="ProductCard-pict" href="{% static 'assets/img/content/home/videoca.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/videoca.png' %}" alt="videoca.png" />-->
+<!--                                </a>-->
+                            </div>
+                        </div>
+                        <div class="ProductCard-desc">
+                            <div class="ProductCard-header">
+                                <h2 class="ProductCard-title">{{product.name}}</h2>
+
+                                <div class="ProductCard-info">
+                                    <div class="ProductCard-cost">
+                                        <div class="ProductCard-price">$55.00
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="ProductCard-text">
+                                <ul>
+                                    {% for sentence in product.description|split_sentence %}
+                                    <li>{{sentence}}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="ProductCard-cart">
+                                <div class="ProductCard-cartElement ProductCard-cartElement_amount">
+                                    <div class="Amount Amount_product">
+                                        <button class="Amount-remove" type="button">
+                                        </button>
+                                        <input class="Amount-input form-input" name="amount" type="text" value="1" />
+                                        <button class="Amount-add" type="button">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ProductCard-cartElement">
+                                    <a class="btn btn_primary" href="#modal_open">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
+                                        <span class="btn-content">Купить</span>
+                                    </a>
+                                </div>
+                                <div id="modal_open" class="my_modal">
+                                    <div class="my_modal-dialog">
+                                        <div class="my_modal-content">
+                                            <div class="my_modal-header">
+                                                <p class="my_modal-title">Поздравляем!</p>
+                                                <a href="#" title="Закрыть модальное окно" class="close">×</a>
+                                            </div>
+                                            <div class="my_modal-body">
+                                                <p>Товар успешно добавлен в корзину!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ProductCard-footer">
+                                <div class="ProductCard-tags">
+                                    <strong class="ProductCard-tagsTitle">Тэги:
+                                    </strong><a href="#">Аксессуары</a>,<a href="#">Дизайн</a>,<a href="#">Игры</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="Tabs Tabs_default">
+                        <div class="Tabs-links">
+                            <a class="Tabs-link_ACTIVE Tabs-link" href="#description">
+                                <span>Описание</span>
+                            </a>
+                            <a class="Tabs-link" href="#sellers">
+                                <span>Продавцы</span>
+                            </a>
+                            <a class="Tabs-link" href="#addit">
+                                <span>Характеристика</span>
+                            </a>
+                            <a class="Tabs-link" href="#reviews">
+                                <span>Отзывы (3)</span>
+                            </a>
+                        </div>
+
+                        <div class="Tabs-wrap">
+                            <div class="Tabs-block" id="description">
+                                <h2>Megano Store Hystory
+                                </h2>
+                                <p>Lorem ipsum dolor sit amet, consectetuer&#32;
+                                    <strong>adipiscing
+                                    </strong>&#32;elit doli. Aenean commodo ligula eget dolor. Aenean massa.&#32;<a href="#">Cumtipsu</a>&#32;sociis natoque penatibus et magnis dis parturient montesti, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eutu, pretiumem.
+                                </p><img class="pict pict_right" src="{% static 'assets/img/content/home/bigGoods.png' %}" alt="bigGoods.png" />
+                                <ul>
+                                    <li>Lorem ipsum dolor sit amet, consectetuer
+                                    </li>
+                                    <li>adipiscing elit doli.&#32;<em>Aenean</em>&#32;commodo ligula
+                                    </li>
+                                    <li>eget dolor. Aenean massa. Cumtipsu sociis
+                                    </li>
+                                    <li>natoque penatibus et magnis dis parturient
+                                    </li>
+                                    <li>montesti, nascetur ridiculus mus. Donec
+                                    </li>
+                                    <li>quam felis, ultricies nec, pellentesque eutu
+                                    </li>
+                                </ul>
+                                <div class="clearfix">
+                                </div>
+                                <div class="table">
+                                    <table>
+                                        <tr>
+                                            <th>Характеристика
+                                            </th>
+                                            <th>Значение
+                                            </th>
+                                        </tr>
+                                        {% for characteristic_value in product.characteristic_values.all %}
+                                        <tr>
+                                            <td>{{ characteristic_value.characteristic.name }}
+                                            </td>
+                                            <td>{{ characteristic_value.value }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+
+<!--                          Блок "продавцы" на детальной странице товара  % include 'products/Название_файла.html' % -->
+
+                            <div class="Tabs-block" id="addit">
+                                <div class="Product-props">
+                                    {% for characteristic_value in product.characteristic_values.all %}
+                                        <div class="Product-prop">
+                                            <strong>{{ characteristic_value.characteristic.name }}
+                                            </strong><span> {{ characteristic_value.value }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            {% include 'products/product_reviews.html' %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+{% endblock %}

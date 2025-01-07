@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.views.generic import DetailView
 
 from .models import Product
 from .forms import ReviewForm
@@ -53,3 +54,8 @@ def add_review(request, pk):
             )
         messages.error(request, form.errors)
         return JsonResponse({'errors':form.errors}, status=400)
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'products/product_detail.html'
