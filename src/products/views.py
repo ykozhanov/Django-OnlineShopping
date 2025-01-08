@@ -127,7 +127,6 @@ class CatalogView(ListView):
         request.POST: Извлечение параметров из формы левого фильтра в self.filter_params
         request.GET: Извлечение параметров из GET запроса в self.filter_params
         """
-        print(self.request.POST)
         if self.request.method == "POST":
             if "price" in self.request.POST:
                 data_from, data_to = self.request.POST["price"].split(";")
