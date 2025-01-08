@@ -13,7 +13,9 @@
                     <div class="ProductCard">
                         <div class="ProductCard-look">
                             <div class="ProductCard-photo">
+                                {% if product.image %}
                                 <img src="{{product.image.url}}"  alt="bigGoods.png" />
+                                {% endif %}
                             </div>
                             <div class="ProductCard-picts">
 <!--                                <a class="ProductCard-pict ProductCard-pict_ACTIVE" href="{% static 'assets/img/content/home/bigGoods.png' %}">-->
@@ -42,7 +44,7 @@
 
                             <div class="ProductCard-text">
                                 <ul>
-                                    {% for sentence in product.description|split_sentence %}
+                                    {% for sentence in product.short_description|split_sentence %}
                                     <li>{{sentence}}</li>
                                     {% endfor %}
                                 </ul>
@@ -81,8 +83,10 @@
 
                             <div class="ProductCard-footer">
                                 <div class="ProductCard-tags">
-                                    <strong class="ProductCard-tagsTitle">Тэги:
-                                    </strong><a href="#">Аксессуары</a>,<a href="#">Дизайн</a>,<a href="#">Игры</a>
+                                    <strong class="ProductCard-tagsTitle">Тэги:</strong>
+                                    {% for tags in product.product_tags.all %}
+                                        <a href="#">{{ tags.tag.name }}</a>,
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -106,28 +110,20 @@
 
                         <div class="Tabs-wrap">
                             <div class="Tabs-block" id="description">
-                                <h2>Megano Store Hystory
-                                </h2>
-                                <p>Lorem ipsum dolor sit amet, consectetuer&#32;
-                                    <strong>adipiscing
-                                    </strong>&#32;elit doli. Aenean commodo ligula eget dolor. Aenean massa.&#32;<a href="#">Cumtipsu</a>&#32;sociis natoque penatibus et magnis dis parturient montesti, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eutu, pretiumem.
-                                </p><img class="pict pict_right" src="{% static 'assets/img/content/home/bigGoods.png' %}" alt="bigGoods.png" />
+                                <h2>Megano Store Hystory </h2>
+
+                                {% with product.description|separate_text_and_list as parts %}
+                                <p>{{ parts.text }}</p>
+                                {% if product.image %}
+                                    <img class="pict pict_right" src="{{product.image.url}}" alt="bigGoods.png" />
+                                {% endif %}
                                 <ul>
-                                    <li>Lorem ipsum dolor sit amet, consectetuer
-                                    </li>
-                                    <li>adipiscing elit doli.&#32;<em>Aenean</em>&#32;commodo ligula
-                                    </li>
-                                    <li>eget dolor. Aenean massa. Cumtipsu sociis
-                                    </li>
-                                    <li>natoque penatibus et magnis dis parturient
-                                    </li>
-                                    <li>montesti, nascetur ridiculus mus. Donec
-                                    </li>
-                                    <li>quam felis, ultricies nec, pellentesque eutu
-                                    </li>
+                                    {% for item in parts.list %}
+                                        <li>{{item}}</li>
+                                    {% endfor %}
                                 </ul>
-                                <div class="clearfix">
-                                </div>
+                                {% endwith %}
+                                <div class="clearfix"> </div>
                                 <div class="table">
                                     <table>
                                         <tr>

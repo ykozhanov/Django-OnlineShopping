@@ -242,6 +242,9 @@ class ReviewModel(models.Model):
     """
     Review model
     """
+    class Meta:
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(max_length=2000, verbose_name='Review text')
@@ -262,6 +265,7 @@ class ViewHistory(models.Model):
 
 
 class ProductTagsModel(models.Model):
+    """Product tags model"""
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,

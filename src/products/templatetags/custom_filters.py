@@ -49,3 +49,15 @@ def split_sentence(value):
     """
     sentence = re.split(r"(?<=[.!?]) +", value)
     return sentence
+
+
+@register.filter
+def separate_text_and_list(value):
+    """Use regular expression to separate text and list"""
+    text_part = re.split(r'-\s*|\d+\.\s*|\d+\)\s*', value)[0].strip()
+    list_part = re.findall(r'-\s*(.*)|\d+\.\s*(.*)|\d+\)\s*(.*)', value)
+    list_part = [item for sublist in list_part for item in sublist if item]
+    return {
+        'text': text_part,
+        'list': list_part
+    }

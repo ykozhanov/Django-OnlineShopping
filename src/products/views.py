@@ -20,7 +20,9 @@ def load_reviews(request, pk, offset):
         {
         "username": review.user.username,
         "created_at": review.created_at.strftime('%B %d / %Y / %H:%M'),
-        "text": review.text
+        "text": review.text,
+        'first_name': review.user.first_name,
+        'last_name': review.user.last_name,
         } for review in reviews
     ]
     return JsonResponse(
@@ -46,10 +48,11 @@ def add_review(request, pk):
             review_count = product.reviews.filter(is_active=True).count()
             return JsonResponse(
                 {
-                    'username': review.user.username,
                     'created_at': review.created_at.strftime('%B %d / %Y / %H:%M'),
                     'text': review.text,
-                    'review_count': review_count
+                    'review_count': review_count,
+                    'first_name': review.user.first_name,
+                    'last_name': review.user.last_name,
                 }
             )
         messages.error(request, form.errors)
