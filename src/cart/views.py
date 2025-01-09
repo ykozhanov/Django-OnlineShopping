@@ -1,7 +1,6 @@
 import json
-from django.db.models import F, Sum
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
 from cart.cart_manager import CartManager
@@ -12,56 +11,57 @@ class CartView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart = CartManager(request=self.request).cart
-        cart_items = cart.items.select_related('product_seller__product', 'product_seller__seller')
-        total_price = cart_items.aggregate(
-            total=Sum(F('quantity') * F('product_seller__price'))
-        )['total'] or 0
+        cart_manager: CartManager = CartManager(request=self.request)
+        cart_items: list[CartItem] = cart_manager.get_cart_items()
 
         context.update({
             'cart_items': cart_items,
-            'total_price': total_price,
         })
         return context
     
 def update_cart_item(request, item_id, action):
-    """Refresh products quantity in the cart or delete"""
+    """Refresh products quantity in the cart or delete view"""
     
     if request.method == 'POST':
-        cart: Cart = get_object_or_404(Cart, user=request.user)
+        cart_manager: CartManager = CartManager(request=request)
+        cart: Cart = cart_manager.cart
         item: CartItem = get_object_or_404(CartItem, id=item_id, cart=cart)
 
-        if action == 'add':
-            item.quantity += 1
-            item.save()
-        elif action == 'remove' and item.quantity > 1:
-            item.quantity -= 1
-            item.save()
+        reload_page: bool = False
+        updated_cart_item = None
+        if action in ['add', 'remove']:
+            increment: int = 1 if action == 'add' else -1
+            updated_cart_item: CartItem | None = cart_manager.update_item_quantity(
+                item=item,
+                increment=increment,
+            )
+            if not updated_cart_item:
+                reload_page = True
         elif action == 'set':
             data = json.loads(request.body)
             quantity = data.get('quantity', 1)
-            if quantity > 0:
-                item.quantity = quantity
-                item.save()
+            updated_cart_item: CartItem | None = cart_manager.set_item_quantity(
+                item=item,
+                quantity=quantity,
+            )
+            if not updated_cart_item:
+                reload_page = True
         elif action == 'delete':
-            item.delete()
+            cart_manager.remove_item(item=item)
+            reload_page = True
+        else:
+            raise ValueError('Operation value is not correct')
 
-        # Refreshing total price
-        total_price = cart.items.aggregate(
-            total=Sum(F('quantity') * F('product_seller__price'))
-        )['total'] or 0
-
-        if action == 'delete':
-            return JsonResponse({
-                'success': True,
-                'total_price': total_price,
-                'reload': True,
-            })
+        total_price: float = cart_manager.get_total_items_price()
+        total_quantity: int = cart_manager.get_total_items_quantity()
+        item_quantity: int = updated_cart_item.quantity if updated_cart_item else 0
     
         return JsonResponse({
             'success': True,
             'total_price': total_price,
-            'item_quantity': item.quantity if action != 'delete' else 0,
+            'total_quantity': total_quantity,
+            'item_quantity': item_quantity,
+            'reload': reload_page,
         })
     
     return JsonResponse({'success': False}, status=400)

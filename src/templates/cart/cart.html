@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div class="Cart-block Cart-block_price">
-                            <div class="Cart-price">{{ item.product_seller.price }}$
+                            <div class="Cart-price">{{ item.product_seller.price }}₽
                             </div>
                         </div>
                     </div>
@@ -38,7 +38,7 @@
                                 <div class="Amount">
                                     <button class="Amount-remove" data-item-id="{{ item.id }}" type="button">
                                     </button>
-                                    <input class="Amount-input form-input" data-item-id="{{ item.id }}" name="amount" type="text" value="{{ item.quantity }}" min="1" />
+                                    <input class="Amount-input form-input" data-item-id="{{ item.id }}" name="amount" type="text" value="{{ item.quantity }}" min="-10000"/>
                                     <button class="Amount-add" data-item-id="{{ item.id }}" type="button">
                                     </button>
                                 </div>
@@ -52,7 +52,7 @@
                 <div class="Cart-total">
                     <div class="Cart-block Cart-block_total">
                         <strong class="Cart-title">Итого:
-                        </strong><span class="Cart-price" id="total-price">{{ total_price|floatformat:2 }}$</span>
+                        </strong><span class="Cart-price" id="total-price">{{ total_products_price|floatformat:2 }}₽</span>
                     </div>
                     <div class="Cart-block"><a class="btn btn_success btn_lg" href="order.html">Оформить заказ</a>
                     </div>
@@ -80,11 +80,12 @@
     document.querySelectorAll('.Amount-input').forEach(input => {
         input.addEventListener('change', () => {
             const value = parseInt(input.value);
-            if (value > 0) {
-                updateCartItem(input.dataset.itemId, 'set', value);
-            } else {
-                input.value = 1; // Минимальное значение
-            }
+            updateCartItem(input.dataset.itemId, 'set', value);
+            // if (value >= 0) {
+            //     updateCartItem(input.dataset.itemId, 'set', value);
+            // } else {
+            //     input.value = 1; // Минимальное значение
+            // }
         });
     });
 
@@ -94,6 +95,20 @@
             updateCartItem(link.dataset.itemId, 'delete');
         });
     });
+
+    // Функция для обновления корзины в хеддере
+    function updateHeaderCart(totalPrice, totalQuantity) {
+        const headerQuantityElement = document.querySelector('.CartBlock-amount');
+        const headerPriceElemet = document.querySelector('.CartBlock-price');
+
+        if (headerQuantityElement) {
+            headerQuantityElement.textContent = `${totalQuantity}`;
+        }
+        totalPrice = Number(totalPrice)
+        if (headerPriceElemet) {
+            headerPriceElemet.textContent = `${totalPrice.toFixed(2)}₽`;
+        }
+    }
 
     // AJAX-запрос на сервер для обновления количества товаров
     function updateCartItem(itemId, action, amount = null) {
@@ -111,7 +126,8 @@
         .then(data => {
             if (data.success) {
                 // Обновление интерфейса корзины
-                document.querySelector(`#total-price`).textContent = `${data.total_price} ₽`;
+                const totalPrice = Number(data.total_price)
+                document.querySelector(`#total-price`).textContent = `${totalPrice.toFixed(2)}₽`;
 
                 // Если обновляем количество товара
                 if (action === 'add' || action === 'remove' || action === 'set') {
@@ -125,14 +141,21 @@
                     if (itemRow) {
                         itemRow.remove();
                     }
-                    if (data.reload) {
+                }
+                
+                // Обновляем страницу, если удаляется товар (при снижении ниже 1 тоже удаляется)
+                if (data.reload === true) {
                         window.location.reload();
                     }
-                }
+
+                // Обновляем хеддер
+                updateHeaderCart(data.total_price, data.total_quantity);
             }
         })
         .catch(error => console.error('Ошибка:', error));
     }
+
+    
 </script>
 {% include 'footer.html' %}
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib.sessions.models import Session
+from django.db.models import F, Sum
 from django.http import HttpRequest
 
 from sellers.models import ProductSeller
@@ -55,6 +56,17 @@ class CartManager:
             return item
         elif item.quantity + increment <= 0:
             self.remove_item(item=item)
+
+    def set_item_quantity(self, item: CartItem, quantity: int) -> CartItem | None:
+        """Set quantity value"""
+        if quantity == 0:
+            self.remove_item(item=item)
+        elif quantity > 0:
+            item.quantity = quantity
+            item.save()
+            return item
+        else:
+            return item
                 
     def get_cart_items(self) -> list[CartItem]:
         """Get all cart items"""
@@ -62,9 +74,26 @@ class CartManager:
 
     def get_total_items_quantity(self) -> int:
         """Get total items quantity"""
-        items_quantity: int = 0
-        for item in self._cart.items.all():
-            items_quantity += item.quantity
-        return items_quantity
-    
+        # items_quantity: int = 0
+        # for item in self.get_cart_items():
+        #     items_quantity += item.quantity
+        # return items_quantity
+        total_quantity = self._cart.items.aggregate(
+                    total=Sum(F('quantity'))
+                )['total'] or 0
+        return total_quantity
 
+    def get_total_items_price(self) -> float:
+        """Get total items price"""
+        # TODO: Учесть скидки!
+        # total_price: float = self._cart.items
+
+        # items_total_price: float = 0
+        # for item in self.get_cart_items():
+        #     items_total_price += item.product_seller.price * item.quantity
+        # return items_total_price
+
+        total_price = self._cart.items.aggregate(
+                    total=Sum(F('quantity') * F('product_seller__price'))
+                )['total'] or 0
+        return total_price
