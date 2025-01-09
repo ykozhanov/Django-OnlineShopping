@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.views import View
 from django.views.generic import DetailView
 
 from .models import Product
@@ -60,5 +61,35 @@ def add_review(request, pk):
 
 
 class ProductDetailView(DetailView):
+    """
+    View for display the product detail info
+    """
     model = Product
     template_name = 'products/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        """
+        Add product seller id and price with min values
+        """
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        sellers = product.sellers.all()
+        if sellers:
+            min_price_seller = min(sellers, key=lambda seller: seller.price)
+            context['min_price_seller_id'] = min_price_seller.id
+            context['min_price_seller_price'] = min_price_seller.price
+
+        return context
+
+
+class AddProductInCart(View):
+    """
+    Stub for handling the addition of a product to the cart.
+    """
+    def post(self, request):
+        username = request.user
+        data = request.POST
+        product_seller_id = data.get('product_seller_id')
+        amount = data.get('amount')
+        print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
+        return JsonResponse({'success': 'Product added to cart successfully'})

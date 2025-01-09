@@ -18,6 +18,7 @@
                                 {% endif %}
                             </div>
                             <div class="ProductCard-picts">
+<!--                                Здесь реализация нескольких картинок-->
 <!--                                <a class="ProductCard-pict ProductCard-pict_ACTIVE" href="{% static 'assets/img/content/home/bigGoods.png' %}">-->
 <!--                                    <img src="{% static 'assets/img/content/home/bigGoods.png' %}" alt="bigGoods.png" />-->
 <!--                                </a>-->
@@ -35,17 +36,17 @@
 
                                 <div class="ProductCard-info">
                                     <div class="ProductCard-cost">
-                                        <div class="ProductCard-price">$55.00
+
+                                        <div class="ProductCard-price">${{min_price_seller_price}} {{min_price_seller_id}}
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
                             <div class="ProductCard-text">
                                 <ul>
                                     {% for sentence in product.short_description|split_sentence %}
-                                    <li>{{sentence}}</li>
+                                        <li>{{sentence}}</li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -55,16 +56,28 @@
                                     <div class="Amount Amount_product">
                                         <button class="Amount-remove" type="button">
                                         </button>
-                                        <input class="Amount-input form-input" name="amount" type="text" value="1" />
+                                        <input class="Amount-input form-input" name="amount" type="text" value="1" id="amount-input" />
                                         <button class="Amount-add" type="button">
                                         </button>
                                     </div>
                                 </div>
                                 <div class="ProductCard-cartElement">
-                                    <a class="btn btn_primary" href="#modal_open">
-                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
-                                        <span class="btn-content">Купить</span>
-                                    </a>
+<!--                                    <form id="add-to-cart-form" action="#" method="post">-->
+<!--                                        {% csrf_token %}-->
+<!--                                        <input type="hidden" name="product_seller_id" value="{{ seller.product_seller_id }}"/>-->
+<!--                                        <input type="hidden" name="amount" id="amount-hidden" value="1"/>-->
+<!--                                        <button class="btn btn_primary" type="submit">-->
+<!--                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg"/>-->
+<!--                                            <span class="btn-content">Купить</span>-->
+<!--                                        </button>-->
+<!--                                    </form>-->
+
+
+                                        <a class="btn btn_primary" href="#modal_open">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
+                                            <span class="btn-content" id="buy-button">Купить</span>
+                                        </a>
+                                    </form>
                                 </div>
                                 <div id="modal_open" class="my_modal">
                                     <div class="my_modal-dialog">
@@ -89,7 +102,6 @@
                                     {% endfor %}
                                 </div>
                             </div>
-
                         </div>
                     </div>
                     <div class="Tabs Tabs_default">
@@ -104,7 +116,7 @@
                                 <span>Характеристика</span>
                             </a>
                             <a class="Tabs-link" href="#reviews">
-                                <span>Отзывы (3)</span>
+                                <span>Отзывы ({{product.reviews.count}})</span>
                             </a>
                         </div>
 
@@ -168,4 +180,47 @@
         </div>
     </div>
     {% include 'footer.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount-input');
+    const buyButton = document.getElementById('buy-button');
+    const modal = document.getElementById('modal_open');
+    const closeButton = document.querySelector('.close');
+
+    // Отправка POST-запроса при нажатии на кнопку "Купить"
+    buyButton.addEventListener('click', function() {
+        const productSellerId = "{{min_price_seller_id}}";
+        const amount = amountInput.value;
+
+        fetch("{% url 'addproduct' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({
+                product_seller_id: productSellerId,
+                amount: amount
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обработка успешного ответа
+            modal.style.display = 'block'; // Показать модальное окно
+        })
+        .catch(error => {
+            // Обработка ошибки
+            console.error('Ошибка при добавлении товара в корзину:', error);
+        });
+    });
+
+    // Закрытие модального окна
+    closeButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.style.display = 'none'; // Скрыть модальное окно
+    });
+});
+</script>
+
 {% endblock %}

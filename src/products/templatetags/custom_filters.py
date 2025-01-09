@@ -42,7 +42,7 @@ def order_by(queryset, args):
     return queryset.order_by(*args)
 
 
-@register.filter()
+@register.filter
 def split_sentence(value):
     """
     Split the text into sentences based on .!?
@@ -61,3 +61,5 @@ def separate_text_and_list(value):
         'text': text_part,
         'list': list_part
     }
+
+
