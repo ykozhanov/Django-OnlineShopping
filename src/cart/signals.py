@@ -8,18 +8,18 @@ from .models import Cart, CartItem
 @receiver(user_logged_in)
 def merge_carts(sender, request, user, **kwargs):
     """Carts sinchronization during authorization"""
-    session_key = request.session.session_key
-    if not session_key:
+    previous_session_key = getattr(request, '_pre_auth_session_key', None)
+    if not previous_session_key:
         # Do nothing if doesnt have session
-        return
+        return 
     
-    session_cart = Cart.objects.filter(session__session_key=session_key, user=None).first()
+    session_cart = Cart.objects.filter(session=previous_session_key, user=None).first()
     user_cart = Cart.objects.filter(user=user).first()
 
     if session_cart and user_cart:
         # Union products
         for item in session_cart.items.all():
-            existing_item = user_cart.items.filter(product=item.product).first()
+            existing_item = user_cart.items.filter(product_seller=item.product_seller).first()
             if existing_item:
                 existing_item.quantity += item.quantity
                 existing_item.save()

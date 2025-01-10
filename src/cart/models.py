@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.sessions.models import Session
+# from django.contrib.sessions.models import Session
 from django.db import models
 
 from sellers.models import ProductSeller
@@ -18,14 +18,12 @@ class Cart(models.Model):
         verbose_name='Related user',
         related_name='cart',
     )
-    session = models.OneToOneField(
-        Session,
-        on_delete=models.CASCADE,
+    session = models.CharField(
+        max_length=256,
         null=True,
         blank=True,
         verbose_name='Session for no-autorized user',
-        related_name='cart',
-    )
+    ) # Без прямой связи с Session для объединения корзин
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Cart adding datetime',
@@ -35,7 +33,7 @@ class Cart(models.Model):
         if self.user:
             return f'Cart of {self.user.email}'
         else:
-            return f'Cart of session {self.session.session_key}'
+            return f'Cart of session {self.session}'
 
 
 # from products.models import Product
