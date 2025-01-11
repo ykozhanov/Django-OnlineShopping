@@ -130,7 +130,7 @@ class ProductAdmin(admin.ModelAdmin):
 
             json_file = form.files["json_file"].file
             fs = FileSystemStorage(location=import_dir)
-            path_file = Path(fs.save(f"import_file_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{json_file.name}", json_file))
+            path_file = Path(fs.save(f"import_file_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{json_file.name}", json_file))
 
             call_command("import_product", path_file='path_file', email=form.cleaned_data["email"])
             return HttpResponse("Импорт начался")
