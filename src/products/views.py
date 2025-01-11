@@ -11,7 +11,7 @@ from django.views.generic import ListView
 from .filter_service import FilterService
 from .models import Product
 from .forms import ReviewForm
-from .services.category_service import get_category_service
+from .services.category_service import CategoryService
 from .services.product_service import get_product_cache_service
 
 
@@ -94,75 +94,23 @@ class CatalogView(ListView):
     single_filters = ("popularity", "avg_price", "reviews", "created_at")
     form_fields = ("in_stock", "free_shipping", "data_to", "data_from", "title")
 
-    def __init__(self, category_service=get_category_service()):
-        super().__init__()
-        self.category_service = category_service
-        self.product_cache_service = get_product_cache_service(category_service=self.category_service)
-        self.filter_params = dict()
-        self.sort_params = dict()
-
     def get_queryset(self) -> list[dict[str, Any]]:
         """Получение списка продуктов по категориям из кеша и применение фильтров"""
-        cached_data = self.product_cache_service.get_products_by_category(category_name=self.kwargs.get("category"))
-        filters = self.fetch_filter_params()
-        keys_for_sort = self.get_sort_keys()
+        self.product_cache_service = get_product_cache_service()
+        cached_products = self.product_cache_service.get_products_by_category(category_name=self.kwargs.get("category"))
+        return self.apply_filters_and_sort(cached_products)
 
-        return FilterService.process_products(products=cached_data, keys_for_sort=keys_for_sort, filters=filters)
-
-    def get_sort_keys(self) -> list[tuple[str, bool]]:
-        """Получение параметров сортировки из GET запроса и создание ключей сортировки с возможностью реверса"""
-        self.sort_params = {key: value for key, value in self.request.GET.items() if key in self.single_filters}
-        keys_for_sort = []
-        for key, value in self.sort_params.items():
-            if key in ("popularity", "reviews"):
-                continue
-            reverse = False if value == "desc" else True
-            keys_for_sort.append((key, reverse))
-        return keys_for_sort
-
-    def fetch_filter_params(self) -> dict[str, Any]:
-        """
-        Извлечение параметров фильтрации
-
-        request.POST: Извлечение параметров из формы левого фильтра в self.filter_params
-        request.GET: Извлечение параметров из GET запроса в self.filter_params
-        """
-        if self.request.method == "POST":
-            if "price" in self.request.POST:
-                data_from, data_to = self.request.POST["price"].split(";")
-                if int(data_from) != self.product_cache_service.min_price:
-                    self.filter_params["data_from"] = data_from
-                if int(data_to) != self.product_cache_service.max_price:
-                    self.filter_params["data_to"] = data_to
-            if "title" in self.request.POST and self.request.POST["title"] != "":
-                self.filter_params["title"] = self.request.POST["title"]
-            exclude_fields = (
-                "data_from",
-                "data_to",
-                "title",
-            )
-            self.update_filter_params(request_data=self.request.POST, exclude_fields=exclude_fields)
-        elif self.request.method == "GET":
-            self.update_filter_params(request_data=self.request.GET, exclude_fields=tuple())
-
-        return self.filter_params
-
-    def update_filter_params(self, request_data: dict[str, Any], exclude_fields: tuple[str, ...]) -> None:
-        """Обновление параметров фильтров из request_data"""
-        self.filter_params.update(
-            {k: v for k, v in request_data.items() if k in self.form_fields and k not in exclude_fields}
+    def apply_filters_and_sort(self, products: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Устанавливает фильтры из request в self и сортирует products по этим фильтрам"""
+        self.sort_params = self.extract_sort_params()
+        self.filters_params = self.extract_filters_params(price_range=self.product_cache_service.get_price_range())
+        return FilterService.process_products(
+            products=products, filter_params=self.filters_params, sort_params=self.sort_params
         )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """
-        get запрос возвращает контекст с текущей страницей пагинации
-        post запрос создаёт новый пагинатор и сбрасывает страницу на первую
-        """
-        if self.request.method == "POST":
-            object_list = self.get_queryset()
-            context = self.create_pagination_context(object_list)
-        else:
-            context = super().get_context_data(**kwargs)
+        """GET запрос возвращает контекст с текущей страницей пагинации"""
+        context = super().get_context_data(**kwargs)
 
         return self.update_context(context=context)
 
@@ -174,10 +122,50 @@ class CatalogView(ListView):
 
         return {"page_obj": page_obj, "object_list": page_obj.object_list, "paginator": paginator}
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        context = self.get_context_data(**kwargs)
+    def extract_sort_params(self):
+        """Извлечение параметров активных фильтров сортировки из request"""
+        return {key: value for key, value in self.request.GET.items() if key in self.single_filters}
 
-        return render(request, self.template_name, context)
+    def extract_filters_params(self, price_range: dict[str, int]) -> dict[str, Any]:
+        """
+        Извлечение параметров фильтрации
+
+        request.POST: Извлечение параметров из формы левого фильтра в self.filter_params
+        request.GET: Извлечение параметров из GET запроса в self.filter_params
+        """
+        filter_params = {}
+        if self.request.method == "POST":
+            if "price" in self.request.POST:
+                data_from, data_to = self.request.POST["price"].split(";")
+                if int(data_from) != price_range["data_min"]:
+                    filter_params["data_from"] = data_from
+                if int(data_to) != price_range["data_max"]:
+                    filter_params["data_to"] = data_to
+            if "title" in self.request.POST and self.request.POST["title"] != "":
+                filter_params["title"] = self.request.POST["title"]
+            exclude_fields = (
+                "data_from",
+                "data_to",
+                "title",
+            )
+            request_data = self.request.POST
+        else:
+            request_data = self.request.GET
+            exclude_fields = tuple()
+        filter_params.update(self.update_filter_params(request_data=request_data, exclude_fields=exclude_fields))
+
+        return filter_params
+
+    def update_filter_params(self, request_data: dict[str, Any], exclude_fields: tuple[str, ...]) -> dict[str, Any]:
+        """Обновление параметров фильтров из request_data"""
+        return {k: v for k, v in request_data.items() if k in self.form_fields and k not in exclude_fields}
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Обрабатывает форму левого фильтра, Cоздаёт новый пагинатор и сбрасывает страницу на первую"""
+        object_list = self.get_queryset()
+        context = self.create_pagination_context(object_list)
+
+        return render(request, self.template_name, self.update_context(context=context))
 
     def update_context(self, context: dict[str, Any]) -> dict[str, Any]:
         """
@@ -185,14 +173,22 @@ class CatalogView(ListView):
 
         request_params: строка с параметрами фильтров для возврата на бекенд в get запросе
         single_filters: параметры центральных фильтров (сортировка)
-        self.filter_params: параметры левого фильтра (фильтрация)
+        filter_params: параметры левого фильтра (фильтрация)
         """
-        context["request_params"] = "&" + urlencode(self.filter_params) if self.filter_params else ""
-        context["request_params"] += "&" + urlencode(self.sort_params) if self.sort_params else ""
-        single_filters = {key: self.request.GET[key] if key in self.request.GET else "" for key in self.single_filters}
-        context["single_filters"] = single_filters
-        context["data_min"] = self.product_cache_service.get_min_price()
-        context["data_max"] = self.product_cache_service.get_max_price()
-        context.update(self.filter_params)
-        context["active_category_list"] = self.category_service.get_active_categories()
+        context["request_params"] = self.build_filter_query_string()
+        context["single_filters"] = self.get_activ_single_filters()
+        context.update(self.product_cache_service.get_price_range())
+        context.update(self.filters_params)
+        context["active_category_list"] = CategoryService.get_active_categories()
         return context
+
+    def build_filter_query_string(self) -> str:
+        """Создание строки с параметрами фильтров для возврата на бекенд в get запросе"""
+        query_string = "&" + urlencode(self.filters_params, doseq=True)
+        query_string += "&" + urlencode(self.sort_params, doseq=True)
+
+        return query_string
+
+    def get_activ_single_filters(self):
+        """Получение параметров всех центральных фильтров (сортировка) из request."""
+        return {key: self.request.GET.get(key, "") for key in self.single_filters}

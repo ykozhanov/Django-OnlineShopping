@@ -4,24 +4,21 @@ from django.core.cache import cache
 from django.db.models import Min, Max, F, QuerySet
 
 from megano import settings
+from products.services.category_service import CategoryService
 from sellers.models import ProductSeller
 
 
-def get_product_cache_service(category_service):
-    return ProductCacheService(category_service=category_service)
+def get_product_cache_service():
+    return ProductCacheService()
 
 
 class ProductCacheService:
-    def __init__(self, category_service):
-        self.category_service = category_service
+    def __init__(self):
         self.max_price = 0
         self.min_price = 0
 
-    def get_min_price(self):
-        return self.min_price
-
-    def get_max_price(self):
-        return self.max_price
+    def get_price_range(self):
+        return {"data_min": self.min_price, "data_max": self.max_price}
 
     def get_products_from_db(self, category_name: str) -> Union[QuerySet[Dict[str, any]], list]:
         """Получает products из базы данных по имени категории."""
@@ -65,7 +62,7 @@ class ProductCacheService:
             if len(products_queryset):
                 aggregation = products_queryset.aggregate(min_price=Min("price"), max_price=Max("price"))
             else:
-                aggregation = {"min_price": 0, "max_price": 0}
+                aggregation = {"min_price": None, "max_price": None}
 
             cached_data = {
                 "products": list(products_queryset),
@@ -82,17 +79,17 @@ class ProductCacheService:
         merged_category_data = []
         for category in products_in_categories:
             merged_category_data.extend(category["products"])
-        self.min_price = min(category["min_price"] for category in products_in_categories)
-        self.max_price = max(category["max_price"] for category in products_in_categories)
+        self.min_price = min(filter(None, (category["min_price"] for category in products_in_categories)), default=0)
+        self.max_price = max(filter(None, (category["max_price"] for category in products_in_categories)), default=0)
 
         return merged_category_data
 
     def get_products_by_category(self, category_name: str) -> List[Dict[str, Any]]:
         """Возвращает кэшированные список products из входящей категории и её наследников"""
-        all_categories = self.category_service.get_active_categories()
+        all_categories = CategoryService.get_active_categories()
         category = [category for category in all_categories if category.name == category_name]
         if category:
-            categories = self.category_service.get_childrens_by_parent(parent=category[0])
+            categories = CategoryService.get_childrens_by_parent(parent=category[0])
             categories_with_products = [self.cache_products_by_category(category.name) for category in categories]
 
             return self.merge_products_categories(categories_with_products)

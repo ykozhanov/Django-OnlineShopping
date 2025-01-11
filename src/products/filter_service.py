@@ -5,6 +5,18 @@ from typing import Any, List, Tuple
 class FilterService:
 
     @staticmethod
+    def get_sort_keys(sort_params: dict[str, str]) -> list[tuple[str, bool]]:
+        """создание ключей сортировки с возможностью реверса из sort_params"""
+        keys_for_sort = []
+        for key, value in sort_params.items():
+            if key in ("popularity", "reviews"):
+                continue
+            reverse = False if value == "desc" else True
+            keys_for_sort.append((key, reverse))
+
+        return keys_for_sort
+
+    @staticmethod
     def group_and_average(products: List[dict[str, Any]]) -> List[dict[str, Any]]:
         """Группирует данные по product.name и вычисляет среднюю цену для каждой группы"""
         grouped_products = defaultdict(list)
@@ -47,10 +59,11 @@ class FilterService:
 
     @staticmethod
     def process_products(
-        products: List[dict[str, Any]], keys_for_sort: List[Tuple[str, bool]], filters: dict[str, Any]
+        products: List[dict[str, Any]], filter_params: dict, sort_params: dict
     ) -> List[dict[str, Any]]:
         """Вызов функций фильтрации, сортировки и группировки"""
-        filtered_products = FilterService.filter_products(filters=filters, products=products)
+        filtered_products = FilterService.filter_products(filters=filter_params, products=products)
         grouped_products = FilterService.group_and_average(products=filtered_products)
+        keys_for_sort = FilterService.get_sort_keys(sort_params=sort_params)
 
         return FilterService.sort_by_keys(keys_for_sort=keys_for_sort, products=grouped_products)
