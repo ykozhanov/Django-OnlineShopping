@@ -2,6 +2,7 @@ import os
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -229,3 +230,12 @@ class ReviewModel(models.Model):
 
     def __str__(self):
         return f'Review by {self.user.username} on {self.product.name}'
+
+
+class ViewHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='view_history')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='viewed_by')
+    viewed_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} просмотрел {self.product.name} в {self.viewed_at}"

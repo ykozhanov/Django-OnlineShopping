@@ -12,7 +12,7 @@ from django.utils.html import format_html
 from django.shortcuts import render
 from django.conf import settings
 
-from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel
+from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel, ViewHistory
 from .signals import clear_menu_cache_signal
 from importapp.forms import JSONImportForm
 
@@ -132,7 +132,7 @@ class ProductAdmin(admin.ModelAdmin):
             fs = FileSystemStorage(location=import_dir)
             path_file = Path(fs.save(f"import_file_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{json_file.name}", json_file))
 
-            call_command("import_product", path_file=path_file, email=form.cleaned_data["email"])
+            call_command("import_product", path_file='path_file', email=form.cleaned_data["email"])
             return HttpResponse("Импорт начался")
 
         return render(request, "admin/json-form.html", context=context)
@@ -199,3 +199,9 @@ class ReviewAdmin(admin.ModelAdmin):
         """Creates short text"""
         return obj.text if len(obj.text) < 48 else obj.text[:48] + '...'
 
+
+@admin.register(ViewHistory)
+class ViewHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'viewed_at')
+    list_filter = ('user', 'product', 'viewed_at')
+    search_fields = ('user__username', 'product__name')
