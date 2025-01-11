@@ -1,14 +1,22 @@
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.views import View
 from django.views.generic import DetailView
+from django.core.cache import cache
 
-from .models import Product
+from .models import Product, SiteSetting, ReviewModel
 from .forms import ReviewForm
+from sellers.models import ProductSeller
+
+
+def get_cache_key(product_id):
+    return f'product_detail_{product_id}'
+
 
 # Create your views here.
-
 def load_reviews(request, pk, offset):
     """
     View for loading a batch of reviews for a product
@@ -67,6 +75,30 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
 
+    def get_cache_timeout(self):
+        """
+        Recieve cache timeout from SiteSettings
+        """
+        timeout = SiteSetting.get_or_create_default('product_cache_timeout', default='2')
+        return int(timeout)
+
+
+    def dispatch(self, *args, **kwargs):
+        """
+        Check cache key and render page
+        """
+        cache_key = get_cache_key(self.kwargs.get('pk'))
+        timeout = self.get_cache_timeout()
+        cache_data = cache.get(cache_key)
+        if cache_data:
+            return cache_data
+        response = super().dispatch(*args, **kwargs)
+        if hasattr(response, 'render') and callable(response.render):
+            response.render()
+        cache.set(cache_key, response, timeout)
+        return response
+
+
     def get_context_data(self, **kwargs):
         """
         Add product seller id and price with min values
@@ -84,7 +116,7 @@ class ProductDetailView(DetailView):
 
 class AddProductInCart(View):
     """
-    Stub for handling the addition of a product to the cart.
+    Класс заглушка для добавления товара в корзину (нужно будет изменить после создания модели корзины)
     """
     def post(self, request):
         username = request.user
@@ -93,3 +125,26 @@ class AddProductInCart(View):
         amount = data.get('amount')
         print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
         return JsonResponse({'success': 'Product added to cart successfully'})
+
+
+@receiver(post_save, sender=Product)
+@receiver(post_delete, sender=Product)
+@receiver(post_save, sender=ProductSeller)
+@receiver(post_delete, sender=ProductSeller)
+@receiver(post_save, sender=ReviewModel)
+@receiver(post_delete, sender=ReviewModel)
+def invalidate_cache(sender, instance, **kwargs):
+    """
+    Delete cache if Product, ProductSeller, ReviewModel have been changed
+    """
+    if sender == Product:
+        product_id = instance.id
+    elif sender == ProductSeller:
+        product_id = instance.product.id
+    elif sender == ReviewModel:
+        product_id = instance.product.id
+    else:
+        return
+
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
