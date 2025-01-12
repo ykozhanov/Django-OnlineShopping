@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-tbdyk+fvh3aym&#g4&%49k96ru0amx%fbjeov(abim0+zuzm56
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", 'localhost', '0.0.0.0']
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0"]
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition
@@ -37,16 +37,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "debug_toolbar",
     "mptt",
     "django_mptt_admin",
-
     "products.apps.ProductsConfig",
     "profiles.apps.ProfilesConfig",
     "importapp.apps.ImportappConfig",
     "banners",
     "sellers.apps.SellersConfig",
+    "discounts.apps.DiscountsConfig",
 ]
 
 MIDDLEWARE = [
@@ -57,9 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-
 ]
 
 ROOT_URLCONF = "megano.urls"
