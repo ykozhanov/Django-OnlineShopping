@@ -129,22 +129,32 @@ class AddProductInCart(View):
 
 @receiver(post_save, sender=Product)
 @receiver(post_delete, sender=Product)
+def invalidate_cache_product_model(sender, instance, **kwargs):
+    """
+    Delete cache if Product have been changed
+    """
+    product_id = instance.id
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
+
+
 @receiver(post_save, sender=ProductSeller)
 @receiver(post_delete, sender=ProductSeller)
+def invalidate_cache_product_seller_model(sender, instance, **kwargs):
+    """
+    Delete cache if  ProductSeller have been changed
+    """
+    product_id = instance.product.id
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
+
+
 @receiver(post_save, sender=ReviewModel)
 @receiver(post_delete, sender=ReviewModel)
-def invalidate_cache(sender, instance, **kwargs):
+def invalidate_cache_review_model(sender, instance, **kwargs):
     """
-    Delete cache if Product, ProductSeller, ReviewModel have been changed
+    Delete cache if ReviewModel have been changed
     """
-    if sender == Product:
-        product_id = instance.id
-    elif sender == ProductSeller:
-        product_id = instance.product.id
-    elif sender == ReviewModel:
-        product_id = instance.product.id
-    else:
-        return
-
+    product_id = instance.product.id
     cache_key = get_cache_key(product_id)
     cache.delete(cache_key)
