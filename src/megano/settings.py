@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-
+    "cart.middleware.SaveSessionKeyMiddleware",
 ]
 
 ROOT_URLCONF = "megano.urls"
@@ -77,6 +77,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "products.context_processors.menu_cache_timeout_setting",
+                "cart.context_processor.main_header_cart_data",
             ],
         },
     },
