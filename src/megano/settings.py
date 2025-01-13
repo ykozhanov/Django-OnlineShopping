@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "uploads"
 
-AUTH_USER_MODEL = "profiles.User"
+AUTH_USER_MODEL = 'profiles.User'
 
 # TODO Обновить настройки почты
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -157,3 +157,10 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}

@@ -4,15 +4,28 @@ from urllib.parse import urlencode
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.contrib import messages
 from django.views import generic
 from django.views.generic import ListView
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.views import View
+from django.views.generic import DetailView
+from django.core.cache import cache
 
+from .models import ReviewModel
+from sellers.models import ProductSeller
 from .filter_service import FilterService
 from .models import Product
 from .forms import ReviewForm
 from .services.category_service import CategoryService
 from .services.product_service import get_product_cache_service
+
+
+def get_cache_key(product_id):
+    return f'product_detail_{product_id}'
 
 
 def load_reviews(request, pk, offset):
@@ -26,8 +39,10 @@ def load_reviews(request, pk, offset):
     reviews_data = [
         {
             "username": review.user.username,
-            "created_at": review.created_at.strftime("%B %d / %Y / %H:%M"),
+            "created_at": review.created_at.strftime('%B %d / %Y / %H:%M'),
             "text": review.text,
+            'first_name': review.user.first_name,
+            'last_name': review.user.last_name,
         }
         for review in reviews
     ]
@@ -55,10 +70,11 @@ def add_review(request, pk):
             review_count = product.reviews.filter(is_active=True).count()
             return JsonResponse(
                 {
-                    "username": review.user.username,
-                    "created_at": review.created_at.strftime("%B %d / %Y / %H:%M"),
-                    "text": review.text,
-                    "review_count": review_count,
+                    'created_at': review.created_at.strftime('%B %d / %Y / %H:%M'),
+                    'text': review.text,
+                    'review_count': review_count,
+                    'first_name': review.user.first_name,
+                    'last_name': review.user.last_name,
                 }
             )
         messages.error(request, form.errors)
@@ -192,3 +208,72 @@ class CatalogView(ListView):
     def get_activ_single_filters(self):
         """Получение параметров всех центральных фильтров (сортировка) из request."""
         return {key: self.request.GET.get(key, "") for key in self.single_filters}
+
+
+class ProductDetailView(DetailView):
+    """
+    View for display the product detail info
+    """
+    model = Product
+    template_name = 'products/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        """
+        Add product seller id and price with min values
+        """
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        sellers = product.sellers.all()
+        if sellers:
+            min_price_seller = min(sellers, key=lambda seller: seller.price)
+            context['min_price_seller_id'] = min_price_seller.id
+            context['min_price_seller_price'] = min_price_seller.price
+
+        return context
+
+
+class AddProductInCart(View):
+    """
+    Класс заглушка для добавления товара в корзину (нужно будет изменить после создания модели корзины)
+    """
+    def post(self, request):
+        username = request.user
+        data = request.POST
+        product_seller_id = data.get('product_seller_id')
+        amount = data.get('amount')
+        print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
+        return JsonResponse({'success': 'Product added to cart successfully'})
+
+
+# TODO: Переместить в signals.py
+@receiver(post_save, sender=Product)
+@receiver(post_delete, sender=Product)
+def invalidate_cache_product_model(sender, instance, **kwargs):
+    """
+    Delete cache if Product have been changed
+    """
+    product_id = instance.id
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
+
+# TODO: Переместить в signals.py
+@receiver(post_save, sender=ProductSeller)
+@receiver(post_delete, sender=ProductSeller)
+def invalidate_cache_product_seller_model(sender, instance, **kwargs):
+    """
+    Delete cache if  ProductSeller have been changed
+    """
+    product_id = instance.product.id
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
+
+# TODO: Переместить в signals.py
+@receiver(post_save, sender=ReviewModel)
+@receiver(post_delete, sender=ReviewModel)
+def invalidate_cache_review_model(sender, instance, **kwargs):
+    """
+    Delete cache if ReviewModel have been changed
+    """
+    product_id = instance.product.id
+    cache_key = get_cache_key(product_id)
+    cache.delete(cache_key)
