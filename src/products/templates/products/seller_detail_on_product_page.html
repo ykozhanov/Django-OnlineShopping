@@ -1,0 +1,45 @@
+<div class="Tabs-block" id="sellers">
+    <div class="Section-content">
+        <div class="Orders">
+            {% for seller in sellers_data %}
+                <div class="Order Order_anons">
+                    <div class="Order-personal">
+                        <div class="row">
+                            <div class="row-block">
+                                <a class="Order-title" href="oneorder.html">
+                                    {{ seller.name }}
+                                </a>
+                                <div class="ProductCard-cartElement" style="margin-top: 10px;">
+                                    <a class="btn btn_primary" href="#modal_open">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
+                                        <span class="btn-content">Купить</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row-block">
+                                <div class="Order-info Order-info_delivery">
+                                    <div class="Order-infoType">Тип доставки:
+                                    </div>
+                                    <div class="Order-infoContent">{{ seller.delivery_type }}
+                                    </div>
+                                </div>
+                                <div class="Order-info Order-info_pay">
+                                    <div class="Order-infoType">Оплата:
+                                    </div>
+                                    <div class="Order-infoContent">{{ seller.payment_type }}
+                                    </div>
+                                </div>
+                                <div class="Order-info">
+                                    <div class="Order-infoType">Стоимость:
+                                    </div>
+                                    <div class="Order-infoContent"><span class="Order-price">{{ seller.price }}$</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
