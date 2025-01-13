@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'header-top.html' %}
+    {% include 'header-main.html' %}
+    {% include 'header-search.html' %}
+    {% load static %}
+    {% load custom_filters %}
+
+    <div class="Middle Middle_top">
+        <div class="Section">
+            <div class="wrap">
+                <div class="Product">
+                    <div class="ProductCard">
+                        <div class="ProductCard-look">
+                            <div class="ProductCard-photo">
+                                {% if product.image %}
+                                <img src="{{product.image.url}}"  alt="bigGoods.png" />
+                                {% endif %}
+                            </div>
+                            <div class="ProductCard-picts">
+<!--                                Здесь реализация нескольких картинок-->
+<!--                                <a class="ProductCard-pict ProductCard-pict_ACTIVE" href="{% static 'assets/img/content/home/bigGoods.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/bigGoods.png' %}" alt="bigGoods.png" />-->
+<!--                                </a>-->
+<!--                                <a class="ProductCard-pict" href="{% static 'assets/img/content/home/slider.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/slider.png' %}" alt="slider.png" />-->
+<!--                                </a>-->
+<!--                                <a class="ProductCard-pict" href="{% static 'assets/img/content/home/videoca.png' %}">-->
+<!--                                    <img src="{% static 'assets/img/content/home/videoca.png' %}" alt="videoca.png" />-->
+<!--                                </a>-->
+                            </div>
+                        </div>
+                        <div class="ProductCard-desc">
+                            <div class="ProductCard-header">
+                                <h2 class="ProductCard-title">{{product.name}}</h2>
+
+                                <div class="ProductCard-info">
+                                    <div class="ProductCard-cost">
+
+                                        <div class="ProductCard-price">${{min_price_seller_price}} {{min_price_seller_id}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ProductCard-text">
+                                <ul>
+                                    {% for sentence in product.short_description|split_sentence %}
+                                        <li>{{sentence}}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="ProductCard-cart">
+                                <div class="ProductCard-cartElement ProductCard-cartElement_amount">
+                                    <div class="Amount Amount_product">
+                                        <button class="Amount-remove" type="button">
+                                        </button>
+                                        <input class="Amount-input form-input" name="amount" type="text" value="1" id="amount-input" />
+                                        <button class="Amount-add" type="button">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ProductCard-cartElement">
+                                        <a class="btn btn_primary" href="#modal_open">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
+                                            <span class="btn-content" id="buy-button">Купить</span>
+                                        </a>
+                                </div>
+                                <div id="modal_open" class="my_modal">
+                                    <div class="my_modal-dialog">
+                                        <div class="my_modal-content">
+                                            <div class="my_modal-header">
+                                                <p class="my_modal-title">Поздравляем!</p>
+                                                <a href="#" title="Закрыть модальное окно" class="close">×</a>
+                                            </div>
+                                            <div class="my_modal-body">
+                                                <p>Товар успешно добавлен в корзину!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ProductCard-footer">
+                                <div class="ProductCard-tags">
+                                    <strong class="ProductCard-tagsTitle">Тэги:</strong>
+                                    {% for tags in product.product_tags.all %}
+                                        <a href="#">{{ tags.tag.name }}</a>,
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Tabs Tabs_default">
+                        <div class="Tabs-links">
+                            <a class="Tabs-link_ACTIVE Tabs-link" href="#description">
+                                <span>Описание</span>
+                            </a>
+                            <a class="Tabs-link" href="#sellers">
+                                <span>Продавцы</span>
+                            </a>
+                            <a class="Tabs-link" href="#addit">
+                                <span>Характеристика</span>
+                            </a>
+                            <a class="Tabs-link" href="#reviews">
+                                <span>Отзывы ({{product.reviews.count}})</span>
+                            </a>
+                        </div>
+
+                        <div class="Tabs-wrap">
+                            <div class="Tabs-block" id="description">
+                                <h2>Megano Store Hystory </h2>
+
+                                {% with product.description|separate_text_and_list as parts %}
+                                <p>{{ parts.text }}</p>
+                                {% if product.image %}
+                                    <img class="pict pict_right" src="{{product.image.url}}" alt="bigGoods.png" />
+                                {% endif %}
+                                <ul>
+                                    {% for item in parts.list %}
+                                        <li>{{item}}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endwith %}
+                                <div class="clearfix"> </div>
+                                <div class="table">
+                                    <table>
+                                        <tr>
+                                            <th>Характеристика
+                                            </th>
+                                            <th>Значение
+                                            </th>
+                                        </tr>
+                                        {% for characteristic_value in product.characteristic_values.all %}
+                                        <tr>
+                                            <td>{{ characteristic_value.characteristic.name }}
+                                            </td>
+                                            <td>{{ characteristic_value.value }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+
+<!--                          Блок "продавцы" на детальной странице товара  % include 'products/Название_файла.html' % -->
+
+                            <div class="Tabs-block" id="addit">
+                                <div class="Product-props">
+                                    {% for characteristic_value in product.characteristic_values.all %}
+                                        <div class="Product-prop">
+                                            <strong>{{ characteristic_value.characteristic.name }}
+                                            </strong><span> {{ characteristic_value.value }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            {% include 'products/product_reviews.html' %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount-input');
+    const buyButton = document.getElementById('buy-button');
+    const modal = document.getElementById('modal_open');
+    const closeButton = document.querySelector('.close');
+
+    // Отправка POST-запроса при нажатии на кнопку "Купить"
+    buyButton.addEventListener('click', function() {
+        const productSellerId = "{{min_price_seller_id}}";
+        const amount = amountInput.value;
+
+        fetch("{% url 'addproduct' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({
+                product_seller_id: productSellerId,
+                amount: amount
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обработка успешного ответа
+            modal.style.display = 'block'; // Показать модальное окно
+        })
+        .catch(error => {
+            // Обработка ошибки
+            console.error('Ошибка при добавлении товара в корзину:', error);
+        });
+    });
+
+    // Закрытие модального окна
+    closeButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.style.display = 'none'; // Скрыть модальное окно
+    });
+});
+</script>
+
+{% endblock %}
