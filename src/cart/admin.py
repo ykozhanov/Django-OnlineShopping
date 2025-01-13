@@ -14,13 +14,13 @@ User = get_user_model()
 class CartAdmin(admin.ModelAdmin):
     """Displaying carts in admin panel"""
 
-    list_display = 'pk', 'get_user_email', 'session_id', 'created_at'
-    search_fields = 'user__email', 'session_id'
+    list_display = 'pk', 'get_user_email', 'session', 'created_at'
+    search_fields = 'user__email', 'session__session_key'
     list_filter = ('created_at', )
 
     fieldsets = [
         (None, {
-            'fields': ('user', 'session_id', 'created_at'),
+            'fields': ('user', 'session', 'created_at'),
         })
     ]
     readonly_fields = ('created_at', )
