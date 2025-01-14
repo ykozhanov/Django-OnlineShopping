@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "importapp.apps.ImportappConfig",
     "products.apps.ProductsConfig",
     "cart.apps.CartConfig",
-    "sellers.apps.SellerConfig",
+    "sellers.apps.SellersConfig",
     "banners",
 ]
 
