@@ -9,12 +9,12 @@ User = get_user_model()
 class OrderModel(models.Model):
     """Order model"""
     DELIVERY_TYPE = [
-        ('usually', 'Usually'),
+        ('ordinary', 'Ordinary'),
         ('express', 'Express')
     ]
     PAYMENT_TYPE = [
         ('online', 'Online cart'),
-        ('online random', "Online from a random stranger's account.")
+        ('someone', "Online from a random stranger's account.")
     ]
     STATUS_TYPE = [
         ('success', 'Success'),
