@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.http import HttpRequest, JsonResponse
@@ -33,7 +35,7 @@ class ComparisonView(LoginRequiredMixin, View):
         return render(request, template_name='comparison/comparison.html', context=context)
 
     @staticmethod
-    def _compare_products(comparison_list: list[int], limit: int):
+    def _compare_products(comparison_list: list[int], limit: int) -> dict[str, QuerySet | dict[str, Any]]:
         products: QuerySet[Product] = Product.objects.filter(id__in=comparison_list)[:limit]
         if len(products) < 2:
             return {
@@ -52,6 +54,12 @@ class ComparisonView(LoginRequiredMixin, View):
                                                products}
 
         return {
-            "products": products,
-            "comparison_data": comparison_data,
+            'products': products,
+            'comparison_data': comparison_data,
         }
+
+
+def get_len_comparison(request: HttpRequest) -> JsonResponse:
+    if request.method == 'GET':
+        comparison_list: list[int] = request.session.get('comparison_list', [])
+        return JsonResponse({'count': len(comparison_list)})
