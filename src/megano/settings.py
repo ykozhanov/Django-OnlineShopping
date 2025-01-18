@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
 import os
 from pathlib import Path
 
@@ -24,7 +25,7 @@ SECRET_KEY = "django-insecure-tbdyk+fvh3aym&#g4&%49k96ru0amx%fbjeov(abim0+zuzm56
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", 'localhost', '0.0.0.0']
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Application definition
@@ -41,9 +42,11 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
 
-    "products.apps.ProductsConfig",
     "profiles.apps.ProfilesConfig",
     "importapp.apps.ImportappConfig",
+    "products.apps.ProductsConfig",
+    "cart.apps.CartConfig",
+    "sellers.apps.SellersConfig",
     "banners",
     "comparison.apps.ComparisonConfig",
 ]
@@ -58,7 +61,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-
+    "cart.middleware.SaveSessionKeyMiddleware",
 ]
 
 ROOT_URLCONF = "megano.urls"
@@ -66,8 +69,7 @@ ROOT_URLCONF = "megano.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -76,6 +78,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "products.context_processors.menu_cache_timeout_setting",
+                "cart.context_processor.main_header_cart_data",
             ],
         },
     },
@@ -130,17 +133,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'uploads'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "uploads"
 
 AUTH_USER_MODEL = 'profiles.User'
 
@@ -152,5 +155,14 @@ AUTH_USER_MODEL = 'profiles.User'
 # EMAIL_HOST_USER = 'your_email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your_email_password'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}

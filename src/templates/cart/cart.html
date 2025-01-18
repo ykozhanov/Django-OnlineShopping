@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+    <meta name="description" content="Корзина товаров">
+{% endblock %}
+
+{% block content %}
+    {% include 'header-top.html' %}
+    {% include 'header-main.html' %}
+    {% include 'header-search.html' %}
+<div class="Middle Middle_top">
+    <div class="Section">
+        <div class="wrap">
+            <form class="form Cart" action="#" method="post">
+                {% csrf_token %}
+                {% for item in cart_items %}
+                <div class="Cart-product">
+                    <div class="Cart-block Cart-block_row">
+                        <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img" src="{{ item.product_seller.product.image.url }}" alt="{{ item.product_seller.product.name }}"></a>
+                        </div>
+                        <div class="Cart-block Cart-block_info"><a class="Cart-title" href="#">{{ item.product_seller.product.name }}</a>
+                            <div class="Cart-desc">{{ item.product_seller.product.description }}
+                            </div>
+                        </div>
+                        <div class="Cart-block Cart-block_price">
+                            <div class="Cart-price">{{ item.product_seller.price }}₽
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Cart-block Cart-block_row">
+                        <div class="Cart-block Cart-block_seller">
+                            <!-- - var options = setOptions(items, ['value', 'selected', 'disabled']);-->
+
+                        </div>
+                        <div class="Cart-block Cart-block_amount">
+                            <div class="Cart-amount">
+                                <div class="Amount">
+                                    <button class="Amount-remove" data-item-id="{{ item.id }}" type="button">
+                                    </button>
+                                    <input class="Amount-input form-input" data-item-id="{{ item.id }}" name="amount" type="text" value="{{ item.quantity }}" min="-10000"/>
+                                    <button class="Amount-add" data-item-id="{{ item.id }}" type="button">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="Cart-block Cart-block_delete"><a class="Cart-delete" href="#" data-item-id="{{ item.id }}"><img src="{% static 'assets/img/icons/card/delete.svg' %}" alt="Delete"></a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="Cart-total">
+                    <div class="Cart-block Cart-block_total">
+                        <strong class="Cart-title">Итого:
+                        </strong><span class="Cart-price" id="total-price">{{ total_products_price|floatformat:2 }}₽</span>
+                    </div>
+                    <div class="Cart-block"><a class="btn btn_success btn_lg" href="order.html">Оформить заказ</a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Обработчик для обновления количества товаров
+    document.querySelectorAll('.Amount-add').forEach(button => {
+        button.addEventListener('click', () => {
+            updateCartItem(button.dataset.itemId, 'add');
+        });
+    });
+
+    document.querySelectorAll('.Amount-remove').forEach(button => {
+        button.addEventListener('click', () => {
+            updateCartItem(button.dataset.itemId, 'remove');
+        });
+    });
+
+    document.querySelectorAll('.Amount-input').forEach(input => {
+        input.addEventListener('change', () => {
+            const value = parseInt(input.value);
+            updateCartItem(input.dataset.itemId, 'set', value);
+            // if (value >= 0) {
+            //     updateCartItem(input.dataset.itemId, 'set', value);
+            // } else {
+            //     input.value = 1; // Минимальное значение
+            // }
+        });
+    });
+
+    document.querySelectorAll('.Cart-delete').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateCartItem(link.dataset.itemId, 'delete');
+        });
+    });
+
+    // Функция для обновления корзины в хеддере
+    function updateHeaderCart(totalPrice, totalQuantity) {
+        const headerQuantityElement = document.querySelector('.CartBlock-amount');
+        const headerPriceElemet = document.querySelector('.CartBlock-price');
+
+        if (headerQuantityElement) {
+            headerQuantityElement.textContent = `${totalQuantity}`;
+        }
+        totalPrice = Number(totalPrice)
+        if (headerPriceElemet) {
+            headerPriceElemet.textContent = `${totalPrice.toFixed(2)}₽`;
+        }
+    }
+
+    // AJAX-запрос на сервер для обновления количества товаров
+    function updateCartItem(itemId, action, amount = null) {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/cart/update/${itemId}/${action}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({ quantity: amount }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновление интерфейса корзины
+                const totalPrice = Number(data.total_price)
+                document.querySelector(`#total-price`).textContent = `${totalPrice.toFixed(2)}₽`;
+
+                // Если обновляем количество товара
+                if (action === 'add' || action === 'remove' || action === 'set') {
+                    const input = document.querySelector(`.Amount-input[data-item-id="${itemId}"]`);
+                    input.value = data.item_quantity;
+                }
+
+                // Если товар удален
+                if (action === 'delete') {
+                    const itemRow = document.querySelector(`.Cart-block[data-item-id="${itemId}"]`);
+                    if (itemRow) {
+                        itemRow.remove();
+                    }
+                }
+                
+                // Обновляем страницу, если удаляется товар (при снижении ниже 1 тоже удаляется)
+                if (data.reload === true) {
+                        window.location.reload();
+                    }
+
+                // Обновляем хеддер
+                updateHeaderCart(data.total_price, data.total_quantity);
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
+    }
+
+    
+</script>
+{% include 'footer.html' %}
+{% endblock %}
