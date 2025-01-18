@@ -36,11 +36,17 @@
                                                         <td></td>
                                                     </tr>
                                                     {% if comparison_data %}
-                                                        {% for characteristic_name, characteristic_data in comparison_data.items %}
+                                                        {% if comparison_data|length < 2 %}
                                                             <tr>
-                                                                <td>{{ characteristic_name }}</td>
-                                                                <td>{{ characteristic_data.product }}</td>
+                                                                <td colspan="2">Добавьте пожалуйста больше товаров для сравнения.</td>
                                                             </tr>
+                                                        {% else %}
+                                                            {% for characteristic_name, characteristic_data in comparison_data.items %}
+                                                                <tr>
+                                                                    <td>{{ characteristic_name }}</td>
+                                                                    <td>{{ characteristic_data.product }}</td>
+                                                                </tr>
+                                                        {% endif %}
                                                         {% endfor %}
                                                     {% else %}
                                                         <tr>

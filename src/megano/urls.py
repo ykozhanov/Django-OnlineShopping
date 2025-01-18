@@ -32,7 +32,7 @@ urlpatterns = [
     path('products/', include('products.urls')),
     path("accounts/", include('profiles.urls')),
     path('banner/', include('banners.urls')),
-    path('compare/', include('comparison.urls')),
+    # path('compare/', include('comparison.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
