@@ -9,7 +9,7 @@ class OrderStep2Forms(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(cleaned_data, 'cleaned_data')
+        # print(cleaned_data, 'cleaned_data')
         return cleaned_data
 
 
@@ -20,5 +20,5 @@ class OrderStep3Forms(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(cleaned_data, 'cleaned_data')
+        # print(cleaned_data, 'cleaned_data')
         return cleaned_data

@@ -90,7 +90,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     fieldsets = [
         (None, {
-            'fields': ('name', 'description', 'category', ),
+            'fields': ('name', 'description', 'short_description', 'category', ),
         }),
         ('Image', {
             'fields': ('image', ),

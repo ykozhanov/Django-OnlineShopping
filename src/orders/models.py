@@ -1,6 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
 from cart.models import CartItem
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -57,3 +59,43 @@ class OrderModel(models.Model):
         choices=STATUS_TYPE,
         default='not success'
     )
+
+
+class DeliveryPriceModel(models.Model):
+    """Model for price delivery"""
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(delivery__in=['ordinary', 'express']),
+                name='delivery_type_check'
+            )
+        ]
+    DELIVERY_TYPE = [
+        ('ordinary', 'Ordinary'),
+        ('express', 'Express')
+    ]
+    delivery = models.CharField(
+        max_length=10,
+        choices=DELIVERY_TYPE,
+        default='usually',
+        unique=True
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name='The Сost of the delivery'
+    )
+    total_price_order = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Total price for order'
+    )
+
+    def save(self, *args, **kwargs):
+        if self.delivery != 'ordinary':
+            self.total_price_order = None
+        super().save(*args, **kwargs)
