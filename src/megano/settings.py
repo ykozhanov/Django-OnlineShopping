@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "cart.apps.CartConfig",
     "sellers.apps.SellersConfig",
     "banners",
+    "comparison.apps.ComparisonConfig",
 ]
 
 MIDDLEWARE = [
