@@ -57,9 +57,26 @@ class OrderModel(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_TYPE,
-        default='not success'
+        default='not success',
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания заказа'
     )
 
+    def save(self, *args, **kwargs):
+        if OrderModel.objects.filter(
+            user=self.user,
+            delivery=self.delivery,
+            city=self.city,
+            address=self.address,
+            pay=self.pay,
+            total_cost=self.total_cost
+        ).exists():
+            raise ValidationError("Заказ с такими данными уже существует.")
+
+        super().save(*args, **kwargs)
 
 class DeliveryPriceModel(models.Model):
     """Model for price delivery"""
