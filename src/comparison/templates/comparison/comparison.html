@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% include 'base.html' %}
 
 {% block meta %}
     <meta name="description" content="Страница сравнения товаров">
@@ -46,8 +46,8 @@
                                                                     <td>{{ characteristic_name }}</td>
                                                                     <td>{{ characteristic_data.product }}</td>
                                                                 </tr>
+                                                            {% endfor %}
                                                         {% endif %}
-                                                        {% endfor %}
                                                     {% else %}
                                                         <tr>
                                                             <td colspan="2">Невозможно сравнить товары, у них нет общих характеристик. "Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</td>
@@ -61,7 +61,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <h2 class="ProductCard-title">Нет товаров для сравнения.</h2>
+                        <h2 class="ProductCard-title">Нет товаров для сравнения</h2>
                     {% endif %}
                 </div>
             </div>

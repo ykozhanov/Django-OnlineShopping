@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "sellers.apps.SellersConfig",
     "banners",
     "comparison.apps.ComparisonConfig",
+    "homepage.apps.HomepageConfig",
 ]
 
 MIDDLEWARE = [
