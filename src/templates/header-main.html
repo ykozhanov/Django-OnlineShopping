@@ -4,7 +4,7 @@
     <div class="wrap">
         <div class="row Header-rowMain">
             <div class="row-block Header-logo">
-                <a class="logo" href="#">
+                <a class="logo" href="{% url 'homepage:index' %}">
                     <img class="logo-image" src="{% static 'assets/img/logo.png' %}" alt="logo.png"/>
                 </a>
             </div>
@@ -12,7 +12,7 @@
                 <div class="menuModal" id="navigate">
                     <ul class="menu menu_main">
                         <li class="menu-item">
-                            <a class="menu-link" href="#">Главная</a>
+                            <a class="menu-link" href="{% url 'homepage:index' %}">Главная</a>
                         </li>
                         <li class="menu-item">
                             <a class="menu-link" href="#">Блог</a>
@@ -20,6 +20,9 @@
                         <li class="menu-item">
                             <span class="menu-label menu-label_success">Скидки</span>
                             <a class="menu-link" href="">Каталог</a>
+                        </li>
+                        <li class="menu-item">
+                            <a class="menu-link" href="{% url 'comparison:comparison' %}">Сравнение</a>
                         </li>
                         <li class="menu-item">
                             <a class="menu-link" href="#">Покупка</a>
@@ -36,7 +39,7 @@
                             <div class="dropdown-content">
                                 <a class="dropdown-content-a" href="{% url 'profiles:profile' %}">Личный кабинет</a>
                                 <a class="dropdown-content-a" href="#">Административный раздел</a>
-                                <a class="dropdown-content-a" href="#">Выход</a>
+                                <a class="dropdown-content-a" href="{% url 'profiles:logout' %}">Выход</a>
                             </div>
                     </div>
                     <a class="CartBlock-block" href="{% url 'cart' %}">

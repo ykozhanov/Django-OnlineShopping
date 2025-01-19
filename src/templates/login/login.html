@@ -14,7 +14,7 @@
             <h3 class="sign-in">Вход</h3>
         </div>
         <div class="clear">
-            <form action="#">
+            <form action="{% url 'profiles:login'%}" method="post">
                 {% csrf_token %}
                 <div>
                     {{ form.email.errors }}
