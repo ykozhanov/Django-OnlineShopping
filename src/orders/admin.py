@@ -5,7 +5,7 @@ from .models import OrderModel, DeliveryPriceModel
 
 @admin.register(OrderModel)
 class OrderViews(admin.ModelAdmin):
-    list_display = 'pk', 'user', 'delivery', 'city', 'address', 'pay', 'created_at'
+    list_display = 'pk', 'user', 'delivery', 'city', 'address', 'pay', 'created_at', 'status'
     list_display_links = 'pk', 'user'
 
 @admin.register(DeliveryPriceModel)

@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from celery.result import AsyncResult
+import random
 from .models import OrderModel
 from products.models import Category
 from profiles.forms import CustomUserEditForm, CustomUserCreationFormForOrder
@@ -7,6 +9,7 @@ from django.urls import reverse
 from .forms import OrderStep2Forms, OrderStep3Forms, OrderStep4Froms
 from django.db.models import Prefetch
 from .utils import calculate_total_price
+from .tasks import process_payment
 
 # Create your views here.
 
@@ -139,14 +142,20 @@ def order_step4_view(request):
         ).first()
 
         if existing_order:
-            request.session['order']['pk'] = str(existing_order.pk)
+            order = request.session['order']
+            order['pk'] = str(existing_order.pk)
+            order['total_cost'] = str(existing_order.total_cost)
+            request.session['order']= order
             return redirect(reverse('orders:payment'))
 
         order_instance = form.save(commit=False)
         order_instance.user = user
         order_instance.save()
         order_instance.cart_items.set(cart_item_pk)
-        request.session['order']['pk'] = str(order_instance.pk)
+        order = request.session['order']
+        order['pk'] = str(order_instance.pk)
+        order['total_cost'] = str(order_instance.total_cost)
+        request.session['order'] = order
         return redirect(reverse('orders:payment'))
 
 
@@ -162,5 +171,52 @@ def order_step4_view(request):
 
 
 def payment_view(request):
+    """view that handles the payment process for an order.
+    It retrieves order details from the session, processes a payment form submission, updates the order with the provided card number,
+    and initiates an asynchronous payment processing task using Celery.
+    After initiating the task, it redirects the user to a payment progress page.
+    """
     template = 'orders/payment.html'
+    order = request.session.get('order', '')
+    pay = order.get('pay',''),
+    order_pk = order.get('pk',''),
+    total_cost = order.get('total_cost', '')
+
+    if request.method == "POST":
+        card_number = request.POST.get('numero1')
+        order = OrderModel.objects.get(pk=order.get('pk'))
+        order.card_number = card_number
+        order.save()
+        order = request.session.get('order', '')
+        order['card_number'] = card_number
+        request.session['order'] = order
+
+        relative_url = reverse('fakeapi:payment_progress')
+        api_url = request.build_absolute_uri(relative_url)
+        countdown = random.randint(10, 20)
+        task = process_payment.apply_async(
+            args=(order_pk, card_number, total_cost, api_url),
+            countdown=countdown,
+        )
+        request.session['task_id'] = task.id
+
+        return redirect(reverse('orders:payment_progress'))
+    return render(request, template, context={'pay':pay})
+
+
+def progress_payment_view(request):
+    """
+    view that handles the progress of a payment process.
+    Check status task and return data to template
+    """
+    template = 'orders/payment_progress.html'
+    task_id = request.session['task_id']
+    task_result = AsyncResult(task_id)
+    if task_result.status == 'SUCCESS':
+        data = task_result.result['data']
+        del request.session['order']
+        del request.session['task_id']
+        request.session.save()
+        return render(request, template, context={'data':data})
+
     return render(request, template)

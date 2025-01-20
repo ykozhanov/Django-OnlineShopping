@@ -60,21 +60,28 @@ class OrderModel(models.Model):
         default='not success',
         blank=True
     )
+    card_number = models.CharField(
+        max_length=8,
+        blank=True,
+        null=True,
+        verbose_name='card number'
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания заказа'
     )
 
+
     def save(self, *args, **kwargs):
-        if OrderModel.objects.filter(
-            user=self.user,
-            delivery=self.delivery,
-            city=self.city,
-            address=self.address,
-            pay=self.pay,
-            total_cost=self.total_cost
-        ).exists():
-            raise ValidationError("Заказ с такими данными уже существует.")
+        if not self.pk:
+            if OrderModel.objects.filter(
+                user=self.user,
+                delivery=self.delivery,
+                city=self.city,
+                address=self.address,
+                total_cost=self.total_cost
+            ).exists():
+                raise ValidationError("Заказ с такими данными уже существует.")
 
         super().save(*args, **kwargs)
 
