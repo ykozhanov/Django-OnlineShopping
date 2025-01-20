@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView, LogoutView
 from django.shortcuts import render
 from django.views.generic import CreateView, DetailView
 from django.urls import reverse_lazy
@@ -44,16 +44,21 @@ def user_profile_edit_view(request):
 class CustomLoginView(LoginView):
     form_class = CustomLoginForm
     template_name = "login/login.html"
-    # TODO Добавить success_url
-    # success_url = reverse_lazy("home")
+    success_url = reverse_lazy("homepage:index")
+    
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+        login(self.request, user)
+        return super().form_valid(form)
 
+class CustomLogoutView(LogoutView):
+    next_page = reverse_lazy("profiles:login")
+    
 
 class UserRegistrationView(CreateView):
-    # model = User
     form_class = CustomUserCreationForm
     template_name = "login/registr.html"
-    # TODO Изменить на home
-    success_url = reverse_lazy("profiles:login")
+    success_url = reverse_lazy("homepage:index")
 
 
 class CustomPasswordResetView(PasswordResetView):
