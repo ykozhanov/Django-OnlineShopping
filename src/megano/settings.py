@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    'rest_framework',
+
     "debug_toolbar",
     "mptt",
     "django_mptt_admin",
@@ -48,9 +50,11 @@ INSTALLED_APPS = [
     "cart.apps.CartConfig",
     "sellers.apps.SellersConfig",
     "banners",
+    'orders.apps.OrdersConfig',
     "comparison.apps.ComparisonConfig",
-    "homepage.apps.HomepageConfig",
 ]
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -156,10 +160,13 @@ AUTH_USER_MODEL = 'profiles.User'
 # EMAIL_HOST_USER = 'your_email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your_email_password'
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
+
+<<<<<<< src/megano/settings.py
+CELERY_IMPORTS = [
+    'orders.tasks',
+]
 
 CACHES = {
     'default': {
@@ -167,3 +174,4 @@ CACHES = {
         'LOCATION': '/var/tmp/django_cache',
     }
 }
+
