@@ -17,8 +17,11 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+
+from django.conf import settings
 from django.conf.urls.static import static
 from . import settings
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,10 +29,12 @@ urlpatterns = [
 
     path("__debug__/", include("debug_toolbar.urls")),
     path('products/', include('products.urls')),
-    path("account/", include('profiles.urls')),
+    path("accounts/", include('profiles.urls')),
     path("cart/", include('cart.urls')),
     path('banner/', include('banners.urls')),
     path('orders/', include('orders.urls')),
+    path('compare/', include('comparison.urls')),
+    path('', include('homepage.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

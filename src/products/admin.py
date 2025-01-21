@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
+from django.contrib.admin import TabularInline
 from django.core.files.storage import FileSystemStorage
 from django.core.management import call_command
 from django.contrib import admin
@@ -12,7 +13,7 @@ from django.utils.html import format_html
 from django.shortcuts import render
 from django.conf import settings
 
-from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel, ViewHistory
+from .models import Category, Characteristic, Product, ProductCharacteristicValue, SiteSetting, ReviewModel, ViewHistory, TagModel, ProductTagsModel
 from .signals import clear_menu_cache_signal
 from importapp.forms import JSONImportForm
 
@@ -70,6 +71,13 @@ class ProductCharacteristicsInline(admin.TabularInline):
     autocomplete_fields = ['characteristic']
     fields = 'characteristic', 'value'
 
+class ProductTagsInline(admin.TabularInline):
+    """
+    Inline tags of product for vizualization in admin panel
+    """
+    model = ProductTagsModel
+    extra = 1
+    fields = ('tag', )
 
 
 @admin.register(Product)
@@ -83,6 +91,7 @@ class ProductAdmin(admin.ModelAdmin):
     ]
     inlines = [
         ProductCharacteristicsInline,
+        ProductTagsInline
     ]
     list_display = 'pk', 'name', 'category_link', 'description_short', 'is_active', 'sort_index'
     list_display_links = 'pk', 'name'
@@ -90,7 +99,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     fieldsets = [
         (None, {
-            'fields': ('name', 'description', 'short_description', 'category', ),
+            'fields': ('name', 'short_description', 'description', 'category', ),
         }),
         ('Image', {
             'fields': ('image', ),
@@ -205,3 +214,18 @@ class ViewHistoryAdmin(admin.ModelAdmin):
     list_display = ('user', 'product', 'viewed_at')
     list_filter = ('user', 'product', 'viewed_at')
     search_fields = ('user__username', 'product__name')
+
+
+@admin.register(TagModel)
+class TagAdmin(admin.ModelAdmin):
+    """
+    Displaying reviews in damin panel
+    """
+    actions = [mark_active, mark_inactive]
+    list_display = ('pk', 'name', 'products')
+    list_display_links = ('pk', 'name')
+    ordering = ('pk', 'name')
+
+    def products(self, obj: TagModel) -> str:
+        """Returns a comma-separated list of product names associated with the tag"""
+        return ', '.join([product_tag.product.name for product_tag in obj.product_tags.all().select_related('product')])

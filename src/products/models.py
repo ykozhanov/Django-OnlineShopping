@@ -83,6 +83,20 @@ class Category(MPTTModel):
             super().save(update_fields=['icon'])
 
 
+class TagModel(models.Model):
+    """
+    Tag model
+    """
+    class Meta:
+        verbose_name = 'Tag'
+        verbose_name_plural = 'tags'
+
+    name = models.CharField(max_length=20, verbose_name='Tag name')
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class Product(models.Model):
     """Product model"""
 
@@ -105,6 +119,12 @@ class Product(models.Model):
         null=False,
         blank=True,
         verbose_name='Product description',
+    )
+    short_description = models.CharField(
+        max_length=200,
+        null=False,
+        blank=True,
+        verbose_name='Product short description'
     )
     image = models.ImageField(
         null=True,
@@ -228,6 +248,9 @@ class ReviewModel(models.Model):
     """
     Review model
     """
+    class Meta:
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(max_length=2000, verbose_name='Review text')
@@ -245,3 +268,20 @@ class ViewHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} просмотрел {self.product.name} в {self.viewed_at}"
+
+
+class ProductTagsModel(models.Model):
+    """Product tags model"""
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='product_tags',
+        verbose_name='Product',
+    )
+    tag = models.ForeignKey(
+        TagModel,
+        on_delete=models.CASCADE,
+        related_name='product_tags',
+        verbose_name='Tag',
+    )
+

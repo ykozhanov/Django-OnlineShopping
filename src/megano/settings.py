@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "sellers.apps.SellersConfig",
     "banners",
     'orders.apps.OrdersConfig',
+    "comparison.apps.ComparisonConfig",
 ]
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -65,7 +66,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-
+    "cart.middleware.SaveSessionKeyMiddleware",
 ]
 
 ROOT_URLCONF = "megano.urls"
@@ -82,6 +83,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "products.context_processors.menu_cache_timeout_setting",
+                "cart.context_processor.main_header_cart_data",
             ],
         },
     },
@@ -148,7 +150,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "uploads"
 
-AUTH_USER_MODEL = "profiles.User"
+AUTH_USER_MODEL = 'profiles.User'
 
 # TODO Обновить настройки почты
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -161,6 +163,15 @@ AUTH_USER_MODEL = "profiles.User"
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
 
+<<<<<<< src/megano/settings.py
 CELERY_IMPORTS = [
     'orders.tasks',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
+

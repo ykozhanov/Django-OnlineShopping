@@ -17,7 +17,7 @@
                 <div class="Comment-column">
                     <header class="Comment-header">
                         <div>
-                            <strong class="Comment-title">{{ review.user.username }}</strong>
+                            <strong class="Comment-title"> {{ review.user.first_name }} {{ review.user.last_name }}</strong>
                             <span class="Comment-date">{{ review.created_at|date:"F d / Y / H:i" }}</span>
                         </div>
                     </header>
@@ -112,7 +112,7 @@
                                 <div class="Comment-column">
                                     <header class="Comment-header">
                                         <div>
-                                            <strong class="Comment-title">${data.username}</strong>
+                                            <strong class="Comment-title">${data.first_name} ${data.last_name}</strong>
                                             <span class="Comment-date">${data.created_at}</span>
                                         </div>
                                     </header>
@@ -194,7 +194,7 @@
                                     <div class="Comment-column">
                                         <header class="Comment-header">
                                             <div>
-                                                <strong class="Comment-title">${review.username}</strong>
+                                                <strong class="Comment-title">${review.first_name} ${review.last_name}</strong>
                                                 <span class="Comment-date">${review.created_at}</span>
                                             </div>
                                         </header>
