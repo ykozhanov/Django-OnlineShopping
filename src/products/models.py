@@ -148,6 +148,12 @@ class Product(models.Model):
         default=True,
         verbose_name='Is product active',
     )
+    short_description = models.CharField(
+        max_length=200,
+        null=False,
+        blank=True,
+        verbose_name='Product short description'
+    )
 
     def __str__(self):
         return f'{self.name}'

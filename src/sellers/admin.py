@@ -94,7 +94,7 @@ class ProductSellerAdmin(admin.ModelAdmin):
     change_form_template = "admin/sellers/change_form.html"
     list_display = ["id", "product", "product_category", "price", "seller", "product_image"]
     list_editable = ("price",)
-    list_display_links = None
+    list_display_links = 'id',
     search_fields = ("product__name", "seller__name")
     list_per_page = 20
 

@@ -20,6 +20,7 @@ from django.urls import path, include
 
 from django.conf import settings
 from django.conf.urls.static import static
+from . import settings
 
 
 urlpatterns = [
@@ -31,6 +32,7 @@ urlpatterns = [
     path("accounts/", include('profiles.urls')),
     path("cart/", include('cart.urls')),
     path('banner/', include('banners.urls')),
+    path('orders/', include('orders.urls')),
     path('compare/', include('comparison.urls')),
     path('', include('homepage.urls')),
 ]
