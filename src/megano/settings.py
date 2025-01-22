@@ -163,7 +163,6 @@ AUTH_USER_MODEL = 'profiles.User'
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
 
-<<<<<<< src/megano/settings.py
 CELERY_IMPORTS = [
     'orders.tasks',
 ]
