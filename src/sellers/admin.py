@@ -85,14 +85,24 @@ class ProductSellerForm(forms.ModelForm):
 
     class Meta:
         model = ProductSeller
-        fields = ("category", "product", "seller", "price")
+        fields = ("category", "product", "seller", "price", "delivery_type", "payment_type", "quantity")
 
 
 @admin.register(ProductSeller)
 class ProductSellerAdmin(admin.ModelAdmin):
     form = ProductSellerForm
     change_form_template = "admin/sellers/change_form.html"
-    list_display = ["id", "product", "product_category", "price", "seller", "product_image"]
+    list_display = [
+        "id",
+        "product",
+        "quantity",
+        "product_category",
+        "price",
+        "seller",
+        "payment_type",
+        "delivery_type",
+        "product_image",
+    ]
     list_editable = ("price",)
     list_display_links = None
     search_fields = ("product__name", "seller__name")
