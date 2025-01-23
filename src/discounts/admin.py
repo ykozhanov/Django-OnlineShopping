@@ -76,10 +76,9 @@ class CartDiscountAdmin(admin.ModelAdmin):
         "max_items",
         "min_total",
         "max_total",
-        "discount_priority",
+        "priority",
     )
 
-    # get_products_group.short_description = "Группы продуктов"
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "products_group":
             kwargs["widget"] = FilteredSelectMultiple(db_field.verbose_name, False)
