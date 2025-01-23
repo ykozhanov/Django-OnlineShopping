@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "sellers.apps.SellersConfig",
     "banners",
     'orders.apps.OrdersConfig',
-    "comparison.apps.ComparisonConfig",
+    'comparison.apps.ComparisonConfig',
 ]
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -83,6 +83,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "products.context_processors.menu_cache_timeout_setting",
+                "products.context_processors.category_context_processor",
                 "cart.context_processor.main_header_cart_data",
             ],
         },
@@ -163,7 +164,7 @@ AUTH_USER_MODEL = 'profiles.User'
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
 
-<<<<<<< src/megano/settings.py
+
 CELERY_IMPORTS = [
     'orders.tasks',
 ]
