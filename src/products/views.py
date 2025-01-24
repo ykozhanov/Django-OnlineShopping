@@ -2,14 +2,13 @@ from typing import Any
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.http import JsonResponse, HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpRequest, HttpResponse
 from django.views import generic
 from django.views.generic import ListView
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views import View
 from django.views.generic import DetailView
