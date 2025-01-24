@@ -21,8 +21,6 @@ from django.views.generic import TemplateView
 
 from django.conf import settings
 from django.conf.urls.static import static
-from . import settings
-
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -36,6 +34,8 @@ urlpatterns = [
     path('banner/', include('banners.urls')),
     path('orders/', include('orders.urls')),
     path('compare/', include('comparison.urls')),
+    path("discounts/", include("discounts.urls")),
+    path('', include('homepage.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
