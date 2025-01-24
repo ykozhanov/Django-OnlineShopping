@@ -9,7 +9,7 @@
 
           categorySelect.addEventListener('change', function() {
             const categoryId = this.value || '0';
-            fetch(`/get_products_for_category/${categoryId}/`)
+            fetch(`/sellers/get_products_for_category/${categoryId}/`)
               .then(response => response.json())
               .then(data => {
                 productSelect.innerHTML = '';
