@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'header-top.html' %}
+    {% include 'header-main.html' %}
+    {% include 'header-search.html' %}
+    {% load static %}
+ <div class="Middle Middle_top">
+        <div class="Section Section_column Section_columnRight Section_columnWide Order">
+            <div class="wrap">
+
+                <div class="Section-column">
+                    <div class="Section-columnSection">
+                        <header class="Section-header">
+                            <strong class="Section-title">Прогресс заполнения
+                            </strong>
+                        </header>
+                        <div class="Section-columnContent">
+                            <div class="NavigateProfile">
+                                <ul class="menu menu_vt">
+                                    <li class="menu-item_ACTIVE menu-item"><a class="menu-link" href="#step1">Шаг 1. Параметры пользователя</a>
+                                    </li>
+                                    <li class="menu-item"><a class="menu-link" href="#step2">Шаг 2. Способ доставки</a>
+                                    </li>
+                                    <li class="menu-item"><a class="menu-link" href="#step3">Шаг 3. Способ оплаты</a>
+                                    </li>
+                                    <li class="menu-item"><a class="menu-link" href="#step4">Шаг 4. Подтверждение заказа</a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+<script>
+</script>
+{% endblock %}

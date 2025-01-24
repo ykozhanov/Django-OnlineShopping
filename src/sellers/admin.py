@@ -104,7 +104,7 @@ class ProductSellerAdmin(admin.ModelAdmin):
         "product_image",
     ]
     list_editable = ("price",)
-    list_display_links = None
+    list_display_links = 'id',
     search_fields = ("product__name", "seller__name")
     list_per_page = 20
 

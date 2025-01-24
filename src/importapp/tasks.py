@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.core.mail import EmailMessage
 from django.conf import settings
 
-from src.products.models import Product
+from products.models import Product
 
 logger = logging.getLogger("import_logger")
 formatter = logging.Formatter("%(levelname)s %(asctime)s %(module)s %(message)s")

@@ -1,0 +1,73 @@
+{% include 'base.html' %}
+
+{% block meta %}
+    <meta name="description" content="Страница сравнения товаров">
+{% endblock %}
+
+{% include 'header-main.html' %}
+{% include 'header-search.html' %}
+{% include 'header-top.html' %}
+
+{% block content %}
+    <div class="Middle">
+        <div class="wrap">
+            <div class="Product">
+                <div class="ProductCard">
+                    {% if products %}
+                        <div class="ProductCard-desc">
+                            {% for product in products %}
+                                <h2 class="ProductCard-title">{{ product.name }}</h2>
+                                <div class="ProductCard-look">
+                                    <div class="ProductCard-photo">
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}" />
+                                    </div>
+                                </div>
+                                <div class="Tabs Tabs_default">
+                                    <div class="Tabs-wrap">
+                                        <div class="Tabs-block">
+                                            <div class="table">
+                                                <table>
+                                                    <tr>
+                                                        <th class="hed">Характеристика</th>
+                                                        <th class="hed">Значение</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><b>Общие параметры</b></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    {% if comparison_data %}
+                                                        {% if comparison_data|length < 2 %}
+                                                            <tr>
+                                                                <td colspan="2">Добавьте пожалуйста больше товаров для сравнения.</td>
+                                                            </tr>
+                                                        {% else %}
+                                                            {% for characteristic_name, characteristic_data in comparison_data.items %}
+                                                                <tr>
+                                                                    <td>{{ characteristic_name }}</td>
+                                                                    <td>{{ characteristic_data.product }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <tr>
+                                                            <td colspan="2">Невозможно сравнить товары, у них нет общих характеристик. "Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <h2 class="ProductCard-title">Нет товаров для сравнения</h2>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% include 'footer.html' %}
+{% include 'footer-about-item.html' %}

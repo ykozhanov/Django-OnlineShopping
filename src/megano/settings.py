@@ -37,16 +37,22 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'rest_framework',
     "debug_toolbar",
     "mptt",
     "django_mptt_admin",
-    "products.apps.ProductsConfig",
+
     "profiles.apps.ProfilesConfig",
     "importapp.apps.ImportappConfig",
-    "banners",
+    "products.apps.ProductsConfig",
+    "cart.apps.CartConfig",
     "sellers.apps.SellersConfig",
-    "discounts.apps.DiscountsConfig",
+    "banners",
+    'orders.apps.OrdersConfig',
+    "comparison.apps.ComparisonConfig",
 ]
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -57,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "cart.middleware.SaveSessionKeyMiddleware",
 ]
 
 ROOT_URLCONF = "megano.urls"
@@ -73,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "products.context_processors.menu_cache_timeout_setting",
+                "cart.context_processor.main_header_cart_data",
             ],
         },
     },
@@ -139,7 +147,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "uploads"
 
-AUTH_USER_MODEL = "profiles.User"
+AUTH_USER_MODEL = 'profiles.User'
 
 # TODO Обновить настройки почты
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -149,7 +157,17 @@ AUTH_USER_MODEL = "profiles.User"
 # EMAIL_HOST_USER = 'your_email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your_email_password'
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 PRODUCT_CACHE_TIMEOUT = 60 * 60 * 24
+
+CELERY_IMPORTS = [
+    'orders.tasks',
+]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
+
