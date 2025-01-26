@@ -72,15 +72,57 @@ class OrderModel(models.Model):
     )
 
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            if OrderModel.objects.filter(
-                user=self.user,
-                delivery=self.delivery,
-                city=self.city,
-                address=self.address,
-                total_cost=self.total_cost
-            ).exists():
-                raise ValidationError("Заказ с такими данными уже существует.")
+    # def save(self, *args, **kwargs):
+    #     if not self.pk:
+    #         existing_orders = OrderModel.objects.filter(
+    #             user=self.user,
+    #             delivery=self.delivery,
+    #             city=self.city,
+    #             address=self.address,
+    #             total_cost=self.total_cost
+    #         )
+    #         if existing_orders.exists():
+    #             raise ValidationError("Заказ с такими данными уже существует.")
+    #
+    #     super().save(*args, **kwargs)
 
+
+class DeliveryPriceModel(models.Model):
+    """Model for price delivery"""
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(delivery__in=['ordinary', 'express']),
+                name='delivery_type_check'
+            )
+        ]
+
+    DELIVERY_TYPE = [
+        ('ordinary', 'Ordinary'),
+        ('express', 'Express')
+    ]
+    delivery = models.CharField(
+        max_length=10,
+        choices=DELIVERY_TYPE,
+        default='usually',
+        unique=True
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name='The Сost of the delivery'
+    )
+    total_price_order = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Total price for order'
+    )
+
+    def save(self, *args, **kwargs):
+        if self.delivery != 'ordinary':
+            self.total_price_order = None
         super().save(*args, **kwargs)
