@@ -27,8 +27,6 @@ def get_cart_data(user):
     return cart_data
 
 
-from .models import DeliveryPriceModel
-
 def delivery_type_price():
     """Return cost of delivery from BD"""
     deliveries_type = DeliveryPriceModel.objects.all()

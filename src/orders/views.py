@@ -115,7 +115,6 @@ class OrderStepFourView(BaseOrderView):
         order['cart_items'] = [item['pk'] for item in order['cart_data']]
         request.session['order'] = order
         context = {'order': order,}
-        print(order)
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
@@ -189,5 +188,4 @@ class OrderPaymentProgressView(BaseOrderView):
         result = payment.get_payment_status()
         if result.get('result') == 'success':
             context['data'] = result
-            print(result)
             return self.render_to_response(context)
