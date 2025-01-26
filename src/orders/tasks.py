@@ -11,6 +11,7 @@ def process_payment(order_pk, card_number, total_cost, api_url):
         'card_number': card_number,
         'order_id': order_pk,
         'total_cost': total_cost,
+        'message': "Оплата прошла"
     }
     result = 200
     if result == 200:

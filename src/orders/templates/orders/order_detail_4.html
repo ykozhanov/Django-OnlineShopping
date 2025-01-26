@@ -106,11 +106,11 @@
                                 </div>
 
                                 <div class="Cart Cart_order">
-                                    {% for item in cart_data %}
+                                    {% for item in order.cart_data %}
                                     <div class="Cart-product">
                                         <div class="Cart-block Cart-block_row">
                                             {% if item.image %}
-                                            <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img" src="{{item.image.url}}" alt="card.jpg" /></a>
+                                            <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img" src="{{item.image}}" alt="card.jpg" /></a>
                                             </div>
                                             {% endif %}
                                             <div class="Cart-block Cart-block_info"><a class="Cart-title" href="#">{{item.product_name}}</a>
@@ -131,7 +131,7 @@
                                     <div class="Cart-total">
                                         <div class="Cart-block Cart-block_total">
                                             <strong class="Cart-title">Итого:
-                                            </strong><span class="Cart-price"> {{total_cost }}$</span>
+                                            </strong><span class="Cart-price"> {{order.total_cost }}$</span>
                                         </div>
                                         <div class="Cart-block">
                                             <button class="btn btn_primary btn_lg" type="submit">Оплатить

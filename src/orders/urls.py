@@ -1,14 +1,21 @@
 from django.urls import path
 
-from .views import order_step1_view, order_step2_view, order_step3_view, order_step4_view, payment_view, progress_payment_view
+from .views import (
+    OrderStepOneView,
+    OrderStepTwoView,
+    OrderStepThreeView,
+    OrderStepFourView,
+    OrderPaymentView,
+    OrderPaymentProgressView
+)
 
 app_name = "orders"
 
 urlpatterns = [
-    path("", order_step1_view, name="orders"),
-    path("step2/", order_step2_view, name='orders_step2'),
-    path("step3/", order_step3_view, name='orders_step3'),
-    path("step4/", order_step4_view, name='orders_step4'),
-    path('payment/', payment_view, name='payment'),
-    path('payment/progress/', progress_payment_view, name='payment_progress')
+    path("", OrderStepOneView.as_view(), name="orders"),
+    path("step2/", OrderStepTwoView.as_view(), name='orders_step2'),
+    path("step3/", OrderStepThreeView.as_view(), name='orders_step3'),
+    path("step4/", OrderStepFourView.as_view(), name='orders_step4'),
+    path('payment/', OrderPaymentView.as_view(), name='payment'),
+    path('payment/progress/', OrderPaymentProgressView.as_view(), name='payment_progress')
 ]

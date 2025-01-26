@@ -72,18 +72,19 @@ class OrderModel(models.Model):
     )
 
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            if OrderModel.objects.filter(
-                user=self.user,
-                delivery=self.delivery,
-                city=self.city,
-                address=self.address,
-                total_cost=self.total_cost
-            ).exists():
-                raise ValidationError("Заказ с такими данными уже существует.")
-
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.pk:
+    #         existing_orders = OrderModel.objects.filter(
+    #             user=self.user,
+    #             delivery=self.delivery,
+    #             city=self.city,
+    #             address=self.address,
+    #             total_cost=self.total_cost
+    #         )
+    #         if existing_orders.exists():
+    #             raise ValidationError("Заказ с такими данными уже существует.")
+    #
+    #     super().save(*args, **kwargs)
 
 
 class DeliveryPriceModel(models.Model):
