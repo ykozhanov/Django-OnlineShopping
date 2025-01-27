@@ -79,7 +79,7 @@
                 const text = form.querySelector('[name=text]').value;
                 const objectId = {{ object.pk }};
 
-                fetch(`{% url 'add_review' pk=object.pk %}`, {
+                fetch(`{% url 'products:add_review' pk=object.pk %}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrfToken,
@@ -170,7 +170,7 @@
                 const offset = document.querySelectorAll('.Comments').length;
                 const csrfToken = document.getElementById('hidden-form').querySelector('[name=csrfmiddlewaretoken]').value;
 
-                fetch(`{% url 'load_reviews' pk=object.pk offset=0 %}`.replace('0', offset), {
+                fetch(`{% url 'products:load_reviews' pk=object.pk offset=0 %}`.replace('0', offset), {
                     method: 'GET',
                     headers: {
                         'X-CSRFToken': csrfToken

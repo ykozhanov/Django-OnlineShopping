@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const productSellerId = "{{min_price_seller_id}}";
         const amount = amountInput.value;
 
-        fetch("{% url 'addproduct' %}", {
+        fetch("{% url 'products:addproduct' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
