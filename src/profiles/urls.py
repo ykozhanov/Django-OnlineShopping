@@ -8,7 +8,8 @@ from .views import (
     CustomPasswordResetConfirmView, 
     UserProfileView, 
     user_profile_edit_view,
-    CustomLogoutView,    
+    CustomLogoutView,
+    UserProductHistoryView
 )
 
 app_name = "profiles"
@@ -24,4 +25,5 @@ urlpatterns = [
 
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('profile/edit/', user_profile_edit_view, name='profile_edit'),
+    path('profile/product_history/', UserProductHistoryView.as_view(), name='product_history')
 ]
