@@ -1,4 +1,5 @@
-from django.shortcuts import redirect
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView
 from products.models import Category
 from profiles.forms import CustomUserEditForm, CustomUserCreationFormForOrder
@@ -6,6 +7,7 @@ from django.urls import reverse
 from .forms import OrderStep2Forms, OrderStep3Forms, OrderStep4Forms, OrderPaymentForm
 from .tasks import process_payment
 from .services import get_cart_data, calculate_total_price, ServiceForPayment
+from .models import OrderModel
 
 # Create your views here.
 
@@ -131,6 +133,7 @@ class OrderStepFourView(BaseOrderView):
 
             order_instance = form.save(commit=False)
             order_instance.save()
+            user.cart.items.clear() # отвязываем товары от корзины
             order_instance.cart_items.set(form_data['cart_items'])
             order['pk'] = str(order_instance.pk)
             request.session['order'] = order
@@ -189,3 +192,42 @@ class OrderPaymentProgressView(BaseOrderView):
         if result.get('result') == 'success':
             context['data'] = result
             return self.render_to_response(context)
+        
+
+class OrdersHistoryList(BaseOrderView):
+    """
+    View that displays the history of orders if user is authenticated.
+    Else - redirect to login page
+    """
+    template_name = 'orders/orders_history_list.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request=request)
+        user = context.get('user')
+        if not user.is_authenticated:
+            return redirect(reverse('profiles:login'))
+        orders = OrderModel.objects.filter(user=user).order_by('-created_at')
+        context.update({'orders': orders})
+        return self.render_to_response(context)
+
+
+class OrdersHistoryDetail(BaseOrderView):
+    """
+    View that displays detail information of specific order of user.
+    If the order doesnt belong to the user - 403 error.
+    """
+    template_name = 'orders/orders_history_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(request=request)
+        user = context.get('user')
+        if not user.is_authenticated:
+            return redirect(reverse('profiles:login'))
+        order_id = self.kwargs.get('id')
+        order = get_object_or_404(OrderModel.objects.prefetch_related('cart_items__product_seller__product'), id=order_id)
+        if order.user != user:
+            raise PermissionDenied('У вас нет доступа к этому заказу.')
+        context.update({'order': order, 'cart_items': order.cart_items.all()})
+        return self.render_to_response(context)
+    
+        

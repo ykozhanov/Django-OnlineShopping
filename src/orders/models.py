@@ -70,6 +70,12 @@ class OrderModel(models.Model):
         auto_now_add=True,
         verbose_name='Дата создания заказа'
     )
+    error_message = models.CharField(
+        max_length=256,
+        blank=True,
+        null=True,
+        verbose_name='Payment error message',
+    )
 
 
     # def save(self, *args, **kwargs):

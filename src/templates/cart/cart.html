@@ -54,7 +54,7 @@
                         <strong class="Cart-title">Итого:
                         </strong><span class="Cart-price" id="total-price">{{ total_products_price|floatformat:2 }}₽</span>
                     </div>
-                    <div class="Cart-block"><a class="btn btn_success btn_lg" href="order.html">Оформить заказ</a>
+                    <div class="Cart-block"><a class="btn btn_success btn_lg" href="{% url 'orders:orders' %}">Оформить заказ</a>
                     </div>
                 </div>
 
