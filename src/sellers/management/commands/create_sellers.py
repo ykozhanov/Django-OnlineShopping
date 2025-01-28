@@ -8,7 +8,7 @@ class Command(BaseCommand):
     """Создание seller"""
 
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args, **options)-> None:
         self.stdout.write("Create seller")
 
         sellers_data = [

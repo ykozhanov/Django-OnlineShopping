@@ -9,7 +9,7 @@ from sellers.models import Seller, ProductSeller
 class Command(BaseCommand):
     help = "Create ProductSeller records for each seller"
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options)-> None:
         with transaction.atomic():
             sellers = Seller.objects.all()
             products = Product.objects.all()
