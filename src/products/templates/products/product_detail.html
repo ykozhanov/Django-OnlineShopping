@@ -37,7 +37,7 @@
                                 <div class="ProductCard-info">
                                     <div class="ProductCard-cost">
 
-                                        <div class="ProductCard-price">${{min_price_seller_price}} {{min_price_seller_id}}
+                                        <div class="ProductCard-price">${{min_price_seller_price}}
                                         </div>
                                     </div>
                                 </div>
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const productSellerId = "{{min_price_seller_id}}";
         const amount = amountInput.value;
 
-        fetch("{% url 'addproduct' %}", {
+        fetch("{% url 'products:addproduct' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
