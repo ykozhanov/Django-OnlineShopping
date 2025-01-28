@@ -145,7 +145,7 @@ class OrderItem(models.Model):
     product_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Стоимость товара')
 
     class Meta:
-        unique_together = ('order', 'product', 'seller')
+        unique_together = ('orders', 'product', 'seller')
 
 # Модель истории просмотров
 class ViewHistory(models.Model):

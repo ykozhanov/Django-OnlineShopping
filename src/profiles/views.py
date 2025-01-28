@@ -3,8 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView, LogoutView
 from django.shortcuts import render
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, TemplateView
 from django.urls import reverse_lazy
+from products.models import ViewHistory
 
 from .forms import CustomUserCreationForm, CustomLoginForm, CustomSetPasswordForm, CustomPasswordResetForm, CustomUserEditForm
 
@@ -80,3 +81,17 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name = "login/password_reset_confirm.html"
     success_url = reverse_lazy("profiles:password_reset_complete")
     form_class = CustomSetPasswordForm
+
+class UserProductHistoryView(TemplateView):
+    """
+    View to display the User's Product History
+    """
+    template_name = 'profiles/user_product_history.html'
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        user = request.user
+        history_products = (ViewHistory.objects.filter(user=user)
+                            .select_related('product__category')
+                            .prefetch_related('product__sellers').all())
+        context['history_products'] = history_products
+        return self.render_to_response(context)
