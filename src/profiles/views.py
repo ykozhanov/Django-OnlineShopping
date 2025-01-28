@@ -24,6 +24,14 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         """
         return self.request.user
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        latest_order = user.orders.order_by('-created_at').first()
+        context.update({'order': latest_order})
+        return context
+
 
 @login_required
 def user_profile_edit_view(request):

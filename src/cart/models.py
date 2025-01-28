@@ -63,10 +63,12 @@ class CartItem(models.Model):
 
     cart = models.ForeignKey(
         Cart,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name='Related cart',
         related_name='items',
-    )
+        null=True,
+        blank=True,
+    )  # допускается возможность отвязки от корзины при оформлении заказа
     product_seller = models.ForeignKey(
         ProductSeller,
         on_delete=models.CASCADE,
