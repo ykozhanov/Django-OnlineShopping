@@ -129,7 +129,6 @@ class OrderStepFourView(BaseOrderView):
 
             order_instance = form.save(commit=False)
             order_instance.save()
-            user.cart.items.clear() # отвязываем товары от корзины
             order_instance.cart_items.set(form_data['cart_items'])
             order['pk'] = str(order_instance.pk)
             request.session['order'] = order
@@ -189,13 +188,15 @@ class OrderPaymentProgressView(BaseOrderView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request=request)
+        user = context.get('user')
+        user.cart.items.clear()  # отвязываем товары от корзины
         order = request.session['order']
         payment = ServiceForPayment(order_pk=order['pk'], card_number=order['card_number'],
                                     total_cost=order['total_cost'], request=request)
 
-        payment_proccess_data = payment.get_payment_status(payment_id=order['payment_id'])
-        if payment_proccess_data.status== 'SUCCESS':
-            payment_data = payment_proccess_data.result
+        payment_process_data = payment.get_payment_status(payment_id=order['payment_id'])
+        if payment_process_data.status== 'SUCCESS':
+            payment_data = payment_process_data.result
             context['data'] = payment_data
             order = OrderModel.objects.get(pk=order['pk'])
             if payment_data['order_data']['status_pay'] == 'not success':
