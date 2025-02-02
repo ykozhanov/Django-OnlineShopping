@@ -1,5 +1,9 @@
 from cart.models import Cart, CartItem
 from django.db.models import Prefetch
+from django.template.defaulttags import url
+from django.urls import reverse
+from celery.result import AsyncResult
+
 from .models import DeliveryPriceModel
 from .tasks import process_payment
 
@@ -65,31 +69,33 @@ class ServiceForPayment:
     Fake class for add order in payment and get payment
     Будет скорректирован в дальнейшем
     """
-    api_url = "url fakepai"
+    api_url = "paymentapi:payment_progress"
 
-    def __init__(self, order_pk, card_number, total_cost):
-        self.api_url = "url fakepai"
+    def __init__(self, order_pk, card_number, total_cost, request):
         self.order_pk = order_pk
         self.card_number =card_number
         self.total_cost = total_cost
         self.payment = {}
+        self.request = request
+
+    def get_api_url(self):
+        relative_url = reverse(self.api_url)
+        absolute_url = self.request.build_absolute_uri(relative_url)
+        return absolute_url
+
 
     def add_payment(self):
         """Будет скорректирован в рамках 6 спринта"""
-        self.payment = process_payment(
+        self.payment = process_payment.delay(
             order_pk=self.order_pk,
             card_number=self.card_number,
             total_cost=self.total_cost,
-            api_url=self.api_url
+            api_url=self.get_api_url()
         )
-        return self.payment
+        print("add_payment", self.payment.id)
+        return self.payment.id
 
-    def get_payment_status(self):
+    def get_payment_status(self, payment_id):
         """Будет реализован в рамках 6 спринта"""
-        self.payment = process_payment(
-            order_pk=self.order_pk,
-            card_number=self.card_number,
-            total_cost=self.total_cost,
-            api_url=self.api_url
-        )
-        return self.payment
+        self.payment_result = AsyncResult(payment_id)
+        return self.payment_result
