@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     "banners",
     'orders.apps.OrdersConfig',
     'comparison.apps.ComparisonConfig',
-    "paymentapi.apps.PaymentapiConfig"
+    "paymentapi.apps.PaymentapiConfig",
+    "discounts.apps.DiscountsConfig",
 ]
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
