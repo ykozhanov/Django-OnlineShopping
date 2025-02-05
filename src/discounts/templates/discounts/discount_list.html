@@ -1,0 +1,84 @@
+{% include 'base.html' %}
+
+{% block meta %}
+    <meta name="description" content="Страница списка скидок">
+{% endblock %}
+
+{% include 'header-main.html' %}
+{% include 'header-search.html' %}
+{% include 'header-top.html' %}
+
+{% load custom_get_item %}
+
+{% block content %}
+    <div class="Section">
+        <div class="wrap">
+            <div class="Cards Cards_blog">
+                {% if object_list %}
+                    {% for product in object_list %}
+                        {% with discount=product_discounts|get_item:product.pk %}
+                            <div class="Card">
+                                <a class="Card-picture" href="{{ product.get_absolute_url }}">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                    {% endif %}
+                                </a>
+                                <div class="Card-date">
+                                    <strong class="Card-date-number">{{ discount.start_date|date:"d" }}</strong>
+                                    <span class="Card-date-month">{{ discount.start_date|date:"M" }}</span>
+                                </div>
+                                {% if discount.end_date %}
+                                    <div class="Card-date Card-date_to">
+                                        <strong class="Card-date-number">{{ discount.end_date|date:"d" }}</strong>
+                                        <span class="Card-date-month">{{ discount.end_date|date:"M" }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if request.session.comparison_list and product.pk in request.session.comparison_list %}
+                                    <div class="Card-pin"></div>
+                                {% endif %}
+                                <div class="Card-content">
+                                    <strong class="Card-title"><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></strong>
+                                    <div class="Card-description">{{ product.description }}</div>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <h1>Скидки уже в пути!</h1>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if is_paginated %}
+        <div class="Pagination">
+            <div class="Pagination-ins">
+                {% if page_obj.has_previous %}
+                    <a class="Pagination-element Pagination-element_prev" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
+                        <img src="assets/img/icons/prevPagination.svg" alt="prev" />
+                    </a>
+                {% endif %}
+                {% for i in page_obj.paginator.page_range %}
+                    {% if i == page_obj.number %}
+                        <a class="Pagination-element Pagination-element_current" href="{{ request.path }}?page={{ i }}">
+                            <span class="Pagination-text">{{ i }}</span>
+                        </a>
+                    {% elif i >= page_obj.number|add:-1 and i <= page_obj.number|add:1 %}
+                        <a class="Pagination-element" href="{{ request.path }}?page={{ i }}">
+                            <span class="Pagination-text">{{ i }}</span>
+                        </a>
+                        {% if page_obj.paginator.num_pages >= 3 and i == 1 %}
+                            <a class="Pagination-element" href="{{ request.path }}?page={{ i|add:2 }}">
+                                <span class="Pagination-text">i|add:2</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <a class="Pagination-element Pagination-element_prev" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                        <img src="assets/img/icons/nextPagination.svg" alt="next" />
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
