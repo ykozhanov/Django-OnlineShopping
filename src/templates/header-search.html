@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load static %}
 
 <header class="Header">
@@ -9,7 +10,7 @@
                          <div class="CategoriesButton-icon"><img src="{% static 'assets/img/icons/allDep.svg' %}"
                                                                  alt="allDep.svg"/>
                          </div>
-                         <span class="CategoriesButton-text">Все категории</span>
+                         <span class="CategoriesButton-text">{% translate "Все категории" %}</span>
                          <div class="CategoriesButton-arrow"></div>
                             {% include "category-menu.html" %}
                      </div>
@@ -24,7 +25,7 @@
                          <input class="search-input" id="title" name="title" type="text"
                                 placeholder="Поиск по товарам"/>
                          <button class="search-button" type="submit" name="search" id="search"><img
-                                 src="{% static 'assets/img/icons/search.svg' %}" alt="search.svg"/>Поиск
+                                 src="{% static 'assets/img/icons/search.svg' %}" alt="search.svg"/>{% translate "Поиск" %}
                          </button>
                      </form>
                  </div>

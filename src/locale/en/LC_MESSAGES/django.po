@@ -1,0 +1,213 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-20 14:49+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: megano/settings.py:145
+msgid "Английский"
+msgstr "English"
+
+#: megano/settings.py:146
+msgid "Русский"
+msgstr "Russian"
+
+#: templates/footer.html:13
+msgid "Навигация"
+msgstr "Navigation"
+
+#: templates/footer.html:16 templates/header-main.html:16
+msgid "Главная"
+msgstr "Main"
+
+#: templates/footer.html:19 templates/header-main.html:23
+msgid "Каталог"
+msgstr "Catalog"
+
+#: templates/footer.html:22 templates/header-main.html:26
+msgid "Сравнение"
+msgstr "Comparison"
+
+#: templates/footer.html:25
+msgid "Профиль"
+msgstr "Profile"
+
+#: templates/footer.html:30
+msgid "Контакты"
+msgstr "Contacts"
+
+#: templates/footer.html:32
+msgid "Телефон"
+msgstr "Phone"
+
+#: templates/header-main.html:19
+msgid "Блог"
+msgstr "Blog"
+
+#: templates/header-main.html:22
+msgid "Скидки"
+msgstr "Discounts"
+
+#: templates/header-main.html:29
+msgid "Покупка"
+msgstr "Purchase"
+
+#: templates/header-main.html:41 templates/header-top.html:49
+msgid "Личный кабинет"
+msgstr ""
+
+#: templates/header-main.html:42
+msgid "Административный раздел"
+msgstr ""
+
+#: templates/header-main.html:43
+msgid "Выход"
+msgstr "Logout"
+
+#: templates/header-main.html:75
+msgid "Показать навигацию"
+msgstr ""
+
+#: templates/header-search.html:13
+msgid "Все категории"
+msgstr "All categories"
+
+#: templates/header-search.html:28
+msgid "Поиск"
+msgstr "Search"
+
+#: templates/header-top.html:51 templates/login/login.html:15
+#: templates/login/password_reset.html:30 templates/login/registr.html:34
+msgid "Вход"
+msgstr "Sign in"
+
+#: templates/header-top.html:52 templates/login/login.html:32
+#: templates/login/registr.html:15
+msgid "Регистрация"
+msgstr "Sing up"
+
+#: templates/login/login.html:29
+msgctxt "input submit"
+msgid "Войти"
+msgstr "Login"
+
+#: templates/login/login.html:31
+msgid "Забыли пароль?"
+msgstr "Forgot the password?"
+
+#: templates/login/password_reset.html:15
+msgid ""
+"\n"
+"                <h3 class=\"sign-in\">Восстановление пароля (1/2)</h3>\n"
+"                <h5>Для восстановления пароля введите адрес электронной "
+"почты, на которую зарегистрирована учетная запись</h5>\n"
+"            "
+msgstr ""
+"\n"
+"                <h3 class=\"sign-in\">Password recovery (1/2)</h3>\n"
+"                <h5>To restore the password, enter the email address Mail, "
+"on which the account is registered</h5>\n"
+"            "
+
+#: templates/login/password_reset.html:28
+msgctxt "input submit"
+msgid "Восстановить пароль"
+msgstr "Restore password"
+
+#: templates/login/password_reset_complete.html:14
+msgid ""
+"\n"
+"            <h3 class=\"sign-in\" >Ваш пароль был успешно изменен</h3>\n"
+"            <h5>Теперь вы можете войти в систему с новым паролем.</h5>\n"
+"        "
+msgstr ""
+
+#: templates/login/password_reset_confirm.html:15
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                <h3 class=\"sign-in\">Восстановление пароля (1/2)</h3>\n"
+#| "                <h5>Для восстановления пароля введите адрес электронной "
+#| "почты, на которую зарегистрирована учетная запись</h5>\n"
+#| "            "
+msgid ""
+"\n"
+"                <h3 class=\"sign-in\">Восстановление пароля (2/2)</h3>\n"
+"                <h5>Придумайте новый пароль для учетной записи</h5>\n"
+"            "
+msgstr ""
+"\n"
+"                <h3 class=\"sign-in\">Password recovery (1/2)</h3>\n"
+"                <h5>To restore the password, enter the email address Mail, "
+"on which the account is registered</h5>\n"
+"            "
+
+#: templates/login/password_reset_confirm.html:28
+#, fuzzy
+#| msgctxt "input submit"
+#| msgid "Восстановить пароль"
+msgctxt "input submit"
+msgid "Сохранить пароль"
+msgstr "Restore password"
+
+#: templates/login/password_reset_done.html:14
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                <h3 class=\"sign-in\">Восстановление пароля (1/2)</h3>\n"
+#| "                <h5>Для восстановления пароля введите адрес электронной "
+#| "почты, на которую зарегистрирована учетная запись</h5>\n"
+#| "            "
+msgid ""
+"\n"
+"            <h3 class=\"sign-in\" >Инструкции по восстановлению пароля "
+"отправлены</h3>\n"
+"            <h5>Мы отправили вам письмо с инструкциями по восстановлению "
+"пароля. Пожалуйста, проверьте вашу электронную почту.</h5>\n"
+"        "
+msgstr ""
+"\n"
+"                <h3 class=\"sign-in\">Password recovery (1/2)</h3>\n"
+"                <h5>To restore the password, enter the email address Mail, "
+"on which the account is registered</h5>\n"
+"            "
+
+#: templates/login/password_reset_email.html:3
+msgid "Здравствуйте,"
+msgstr ""
+
+#: templates/login/password_reset_email.html:5
+msgid ""
+"\n"
+"    Вы получили это письмо, потому что запросили восстановление пароля для "
+"вашей учетной записи.\n"
+"    Пожалуйста, перейдите по следующей ссылке, чтобы установить новый "
+"пароль:\n"
+msgstr ""
+
+#: templates/login/password_reset_email.html:12
+msgid ""
+"Если вы не запрашивали восстановление пароля, просто проигнорируйте это "
+"письмо."
+msgstr ""
+
+#: templates/login/registr.html:33
+#, fuzzy
+#| msgid "Регистрация"
+msgctxt "input submit"
+msgid "Зарегистрироваться"
+msgstr "Sing up"

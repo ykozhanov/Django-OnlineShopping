@@ -21,12 +21,16 @@ from django.views.generic import TemplateView
 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("sellers/", include("sellers.urls")),
-
     path("__debug__/", include("debug_toolbar.urls")),
+    path("api/", include('paymentapi.urls')),
+]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += i18n_patterns(
+    path("admin/", admin.site.urls),
     path('', TemplateView.as_view(template_name="index.html"), name='index'),
     path('products/', include('products.urls')),
     path("accounts/", include('profiles.urls')),
@@ -35,10 +39,8 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('compare/', include('comparison.urls')),
     path("discounts/", include("discounts.urls")),
-    path("api/", include('paymentapi.urls'))
-]
-
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path("sellers/", include("sellers.urls")),
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
