@@ -74,6 +74,7 @@ class CartManager:
 
     def get_total_items_quantity(self) -> int:
         """Get total items quantity"""
+        
         total_quantity = self._cart.items.aggregate(
                     total=Sum(F('quantity'))
                 )['total'] or 0

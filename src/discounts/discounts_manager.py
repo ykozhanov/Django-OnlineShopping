@@ -14,7 +14,7 @@ class DiscountsManager:
     def get_all_products_discounts(self, products: list[Product]) -> dict[Product, dict[str, list[Discount | int]]]:
         """"Возвращает словарь продуктов со связанными скидками"""
         if not products:
-            return []
+            return {}
         discounts_dict: dict[Product, dict[str, list[Discount | int]]] = {}
         products_with_discounts = Product.objects.filter(
             id__in=[product.id for product in products],
@@ -31,10 +31,11 @@ class DiscountsManager:
             discounts_dict[product] = {'group_discount': [], 'category_ids': [], 'category_discounts': []}
 
             # получаем id категорий
-            discounts_dict[product]['category_ids'].append(product.id)
-            parent = product.parent
+            discounts_dict[product]['category_ids'].append(product.category.id)  # добавляем id прямой категории товвара
+            parent = product.category.parent
             while parent:  # проходимся по родительским категориям
-                discounts_dict[product]['category_ids'].append(product.id)
+                discounts_dict[product]['category_ids'].append(parent.id)
+                parent = parent.parent
             
             # добавляем id категорий в общий набор
             category_ids.update(discounts_dict[product]['category_ids'])
@@ -60,14 +61,15 @@ class DiscountsManager:
 
 
     def get_priority_products_discounts(self, products: list[Product]) -> dict[Product, list[Discount]]:
-        """"Возвращает словарь продуктов с приоритетными скидками"""
+        """"Возвращает словарь продуктов с приоритетными скидками (может быть несколько скидок с одинаковым приоритетом)"""
         prorduct_discounts: dict[Product, dict] = self.get_all_products_discounts(products=products)
         res: dict[Product, list[Discount]] = {}
         for product, data in prorduct_discounts.items():
-            if not data.get('group_discount') or not data.get('category_discounts'):
+            if not data.get('group_discount') and not data.get('category_discounts'): # у товара нет скидок
                 res[product] = []
+                continue
 
-            discounts: list[Discount] = data.get('group_discount').extend(data.get('category_discounts'))
+            discounts: list[Discount] = data.get('group_discount').extend(data.get('category_discounts'))  # все имеющиеся скидки
             active_discounts: list[Discount] = []
             for discount in discounts:
                 if not discount.is_active:  # не включаем деактивированную
@@ -80,6 +82,7 @@ class DiscountsManager:
 
             if not active_discounts:
                 res[product] = []
+                continue
 
             max_priority_value: int = max([discount.priority for discount in active_discounts])
             priority_discounts: list[Discount] = [discount for discount in active_discounts if discount.priority == max_priority_value]
@@ -95,13 +98,15 @@ class DiscountsManager:
         )
         discount_prices: dict[Product, float] = {}
         for product, discounts in products_discounts.items():
-            price: float | None = products_prices.get(product):
+            price: float | None = products_prices.get(product)
             if not price:
+                # Берется максимальная цена по продавцам товара
                 product_sallers: list[ProductSeller] = ProductSeller.objects.filter(product=product)
                 price: float = max([product_saller.price for product_saller in product_sallers])
 
             if not discounts:
                 discount_prices[product] = price
+                continue
 
             discount_price: float = price
             for discount in discounts:
@@ -147,7 +152,7 @@ class DiscountsManager:
             Q(is_active=True) &
             Q(end_date__gte=datetime.now()) &
             (Q(start_date__isnull=True) | Q(start_date__lte=datetime.now()))
-        ).prefetch_related('product_groups'))
+        ).prefetch_related('product_groups__products'))
 
         if not active_cart_discounts:
             return total_price
@@ -199,6 +204,49 @@ class DiscountsManager:
             )
 
         else:  # Расчет по наборам
-            pass
+            if not discount.product_groups:
+                return None
+            # проверка наличия в корзине товаров из каждой группы для применения скидки
+            cart_products: dict[Product, dict[str, float | int | bool]] = {
+                cart_item.product_seller.product: {
+                    'quantity': cart_item.quantity,
+                    'price': cart_item.product_seller.price,
+                    'is_included_in_set': False,
+                }
+                for cart_item in cart_items
+            }
+            products_count_to_discount: int = len(discount.product_groups)  # кол-во различных товаров, необходимое для применения скидки
+            for group in discount.product_groups:
+                for product in cart_products:
+                    if product in group.products:
+                        cart_products[product]['is_included_in_set'] = True
+                        discount.product_groups -= 1
+                        break  # в корзине есть товар из группы
+            if products_count_to_discount > 0:
+                return None  # скидка не применяется
             
-        
+            discount_products_quantity: int = min(
+                product_details.get('quantity')
+                for product_details in cart_products.values()
+                if product_details.get('is_included_in_set')
+            )  # кол-во товаров для скидки за набор (общий максимум)
+
+            total_price: float = 0
+            total_price += sum(
+                product_detail.get('quantity') * product_detail.get('price')
+                for product_detail in cart_products.values()
+                if product_detail.get('is_included_in_set') == False
+            )  # добавление товаров без скидки набора
+            total_price += self._calc_discount_price(
+                price=sum(
+                    product_details.get('price')
+                    for product_details in cart_products.values()
+                    if product_details.get('is_included_in_set')
+                )
+            ) * discount_products_quantity  # добавление товаров со скидкой набора (с учетом максимального совеместного кол-ва)
+            total_price += sum(
+                product_details.get('price') * (product_details.get('quantity') - discount_products_quantity)
+                for product_details in cart_products.values()
+                if product_details.get('is_included_in_set')
+            )
+            return total_price
