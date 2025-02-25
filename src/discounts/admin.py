@@ -26,8 +26,8 @@ class DiscountAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
-        "products_list",
-        "category",
+        "product_groups_list",
+        "categories_list",
         "description",
         "start_date",
         "end_date",
@@ -38,14 +38,19 @@ class DiscountAdmin(admin.ModelAdmin):
     )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if db_field.name == "products":
+        if db_field.name in ("product_groups", "categories"):
             kwargs["widget"] = FilteredSelectMultiple(db_field.verbose_name, False)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
-    @admin.display(description="Товары")
-    def products_list(self, obj):
-        products = obj.products.all()
-        return render_objects_widget(products)
+    @admin.display(description="Группы товаров")
+    def product_groups_list(self, obj):
+        product_groups = obj.product_groups.all()
+        return render_objects_widget(product_groups)
+    
+    @admin.display(description="Категории товаров")
+    def categories_list(self, obj):
+        categories = obj.categories.all()
+        return render_objects_widget(categories)
 
 
 @admin.register(ProductsGroup)
@@ -65,7 +70,7 @@ class CartDiscountAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
-        "get_products_group",
+        "get_product_groups",
         "description",
         "start_date",
         "end_date",
@@ -80,11 +85,11 @@ class CartDiscountAdmin(admin.ModelAdmin):
     )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if db_field.name == "products_group":
+        if db_field.name == "product_groups":
             kwargs["widget"] = FilteredSelectMultiple(db_field.verbose_name, False)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     @admin.display(description="Группы продуктов")
-    def get_products_group(self, obj):
-        groups = obj.products_group.all()
+    def get_product_groups(self, obj):
+        groups = obj.product_groups.all()
         return render_objects_widget(groups)
