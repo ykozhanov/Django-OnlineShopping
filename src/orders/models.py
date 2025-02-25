@@ -76,6 +76,13 @@ class OrderModel(models.Model):
         null=True,
         verbose_name='Payment error message',
     )
+    payment_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='id for payment service',
+        default=None,
+    )
 
 
     # def save(self, *args, **kwargs):

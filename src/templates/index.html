@@ -4,12 +4,13 @@
     <meta name="description" content="Домашняя страница сайта">
 {% endblock %}
 
+{% if not user.is_authenticated %}
+    {% include 'header-top.html' %}
+{% endif %}
 {% include 'header-main.html' %}
 {% include 'header-search.html' %}
-{% include 'header-top.html' %}
 
 {% block content %}
 {% endblock %}
 
 {% include 'footer.html' %}
-{% include 'footer-about-item.html' %}

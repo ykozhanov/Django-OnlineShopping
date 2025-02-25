@@ -1,10 +1,9 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 
-from megano import settings
+from .views import DiscountListView
 
+app_name = "discounts"
 
-from django.conf import settings
-from django.conf.urls.static import static
-
-urlpatterns = []
+urlpatterns = [
+    path('',DiscountListView.as_view(), name='discount_list'),
+]

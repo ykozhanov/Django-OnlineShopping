@@ -3,6 +3,7 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -148,12 +149,6 @@ class Product(models.Model):
         default=True,
         verbose_name='Is product active',
     )
-    short_description = models.CharField(
-        max_length=200,
-        null=False,
-        blank=True,
-        verbose_name='Product short description'
-    )
 
     def __str__(self):
         return f'{self.name}'
@@ -172,6 +167,9 @@ class Product(models.Model):
             self.image.storage.save(new_image_path, self.image.file)
             self.image.name = new_image_path
             super().save(update_fields=['image'])
+
+    def get_absolute_url(self) -> str:
+        return reverse('products:detail_view', args=[str(self.pk)])
 
 
 class Characteristic(models.Model):

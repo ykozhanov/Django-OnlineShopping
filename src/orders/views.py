@@ -1,11 +1,9 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView
-from products.models import Category
 from profiles.forms import CustomUserEditForm, CustomUserCreationFormForOrder
 from django.urls import reverse
 from .forms import OrderStep2Forms, OrderStep3Forms, OrderStep4Forms, OrderPaymentForm
-from .tasks import process_payment
 from .services import get_cart_data, calculate_total_price, ServiceForPayment
 from .models import OrderModel
 
@@ -15,9 +13,7 @@ class BaseOrderView(TemplateView):
 
     def get_context_data(self, request, **kwargs):
         context = super().get_context_data(**kwargs)
-        category_list = Category.objects.all()
         user = request.user
-        context['category_list'] = category_list
         context["user"] = user
         return context
 
@@ -133,7 +129,6 @@ class OrderStepFourView(BaseOrderView):
 
             order_instance = form.save(commit=False)
             order_instance.save()
-            user.cart.items.clear() # отвязываем товары от корзины
             order_instance.cart_items.set(form_data['cart_items'])
             order['pk'] = str(order_instance.pk)
             request.session['order'] = order
@@ -166,12 +161,19 @@ class OrderPaymentView(BaseOrderView):
         form = OrderPaymentForm(data=order)
         form.order_pk = order['pk']
         if form.is_valid():
-            form.save()
-            payment = ServiceForPayment(order_pk=order['pk'],card_number=order['card_number'],total_cost=order['total_cost'])
-            result = payment.add_payment()
+            order_instance = form.save()
+            payment = ServiceForPayment(
+                order_pk=order['pk'],
+                card_number=order['card_number'],
+                total_cost=order['total_cost'],
+                request=request
+            )
+            payment_id = payment.add_payment()
+            order_instance.payment_id = payment_id
+            order_instance.save()
             del order['user']
-            request.session['order'] = order
-            request.session['task_id'] = result
+            order['payment_id'] = payment_id
+            request.session.update({'order': order})
             return redirect(reverse('orders:payment_progress'))
         context['form'] = form
         return self.render_to_response(context)
@@ -179,20 +181,33 @@ class OrderPaymentView(BaseOrderView):
 
 class OrderPaymentProgressView(BaseOrderView):
     """
-    View that handles the progress of a payment process.Check status task and return data to template
+    View that handles the progress of a payment process.Check status task and return data to template.
+    Refreshes the page until the task status is success.
     """
     template_name = 'orders/payment_progress.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request=request)
+        user = context.get('user')
+        user.cart.items.clear()  # отвязываем товары от корзины
         order = request.session['order']
         payment = ServiceForPayment(order_pk=order['pk'], card_number=order['card_number'],
-                                    total_cost=order['total_cost'])
-        result = payment.get_payment_status()
-        if result.get('result') == 'success':
-            context['data'] = result
+                                    total_cost=order['total_cost'], request=request)
+
+        payment_process_data = payment.get_payment_status(payment_id=order['payment_id'])
+        if payment_process_data.status== 'SUCCESS':
+            payment_data = payment_process_data.result
+            context['data'] = payment_data
+            order = OrderModel.objects.get(pk=order['pk'])
+            if payment_data['order_data']['status_pay'] == 'not success':
+                order.error_message = payment_data['order_data']['message']
+            else:
+                order.status = 'success'
+                order.error_message = ''
+            order.save()
             return self.render_to_response(context)
-        
+        return self.render_to_response(context)
+
 
 class OrdersHistoryList(BaseOrderView):
     """

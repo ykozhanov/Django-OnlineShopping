@@ -23,7 +23,7 @@
             <div class="wrap">
                 <div class="ProgressPayment">
                     {% if data %}
-                    <div class="ProgressPayment-title">{{data.data.message}}
+                    <div class="ProgressPayment-title">{{data.order_data.message}}
                     </div>
                     {% else %}
                     <div class="ProgressPayment-title">Ждем подтверждения оплаты платежной системой
@@ -46,11 +46,11 @@
     // Проверяем, есть ли данные {{ data }}
     const hasData = {{ data|yesno:"true,false" }};
 
-    // Если данных нет, запускаем обновление страницы каждые 5 секунд
+    // Если данных нет, запускаем обновление страницы каждые 6 секунд
     if (!hasData) {
         setInterval(function() {
             location.reload();
-        }, 5000); // 5000 миллисекунд = 5 секунд
+        }, 6000); // 6000 миллисекунд = 6 секунд
     }
 </script>
 {% endblock %}
