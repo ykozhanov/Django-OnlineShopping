@@ -241,5 +241,6 @@ class AddProductInCart(View):
         product_seller_id = data.get('product_seller_id')
         amount = data.get('amount')
         print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
+
         return JsonResponse({'success': 'Product added to cart successfully'})
 
