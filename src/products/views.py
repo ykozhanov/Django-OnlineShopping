@@ -5,22 +5,24 @@ from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.views import generic
 from django.views.generic import ListView
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+# from django.db.models.signals import post_save, post_delete
+# from django.dispatch import receiver
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views import View
 from django.views.generic import DetailView
-from django.core.cache import cache
-
-from .models import ReviewModel
+# from django.core.cache import cache
+#
+# from .models import ReviewModel
 from sellers.models import ProductSeller
+from cart.models import Cart, CartItem
 from .filter_service import FilterService
 from .models import Product
 from .forms import ReviewForm
 from .services.category_service import CategoryService
 from .services.product_service import get_product_cache_service
+from .services.cart_service import get_or_create_user_cart, get_or_create_cart_items
 
 
 def get_cache_key(product_id):
@@ -233,14 +235,10 @@ class ProductDetailView(DetailView):
 
 class AddProductInCart(View):
     """
-    Класс заглушка для добавления товара в корзину (нужно будет изменить после создания модели корзины)
+    Add product in user cart
     """
     def post(self, request):
-        username = request.user
-        data = request.POST
-        product_seller_id = data.get('product_seller_id')
-        amount = data.get('amount')
-        print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
-
+        get_or_create_cart_items(request=request)
         return JsonResponse({'success': 'Product added to cart successfully'})
+
 
