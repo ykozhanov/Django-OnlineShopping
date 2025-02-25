@@ -2,7 +2,7 @@ from typing import Any
 
 from django.shortcuts import render
 from django.views import View
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 
@@ -31,9 +31,19 @@ def compare_products(products: QuerySet[Product]) -> dict[str, QuerySet | dict[s
 
 class ComparisonView(LoginRequiredMixin, View):
 
-    def get(self, request: HttpRequest) -> JsonResponse:
+    def get(self, request: HttpRequest) -> HttpResponse:
         cs = ComparisonService(request)
         limit = int(request.GET.get("limit", "3"))
         products = cs.get_products(limit)
         context = compare_products(products)
         return render(request, template_name='comparison/comparison.html', context=context)
+
+    def post(self, request: HttpRequest, product_id: int) -> JsonResponse:
+        cs = ComparisonService(request)
+        cs.add_product(product_id)
+        return JsonResponse({"message": "OK"})
+
+    def delete(self, request: HttpRequest, product_id: int) -> JsonResponse:
+        cs = ComparisonService(request)
+        cs.remove_product(product_id)
+        return JsonResponse({"message": "OK"})

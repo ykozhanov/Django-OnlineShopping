@@ -10,7 +10,7 @@ class ComparisonService:
         self.request = request
 
     def add_product(self, product_id: int) -> None:
-        product = get_object_or_404(Product, id=product_id)
+        get_object_or_404(Product, id=product_id)
         comparison_list: list[int] = self.request.session.get('comparison_list', [])
 
         if product_id not in comparison_list:
