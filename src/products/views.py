@@ -22,7 +22,7 @@ from .models import Product
 from .forms import ReviewForm
 from .services.category_service import CategoryService
 from .services.product_service import get_product_cache_service
-from .services.cart_service import get_or_create_user_cart, get_or_create_cart_items
+from .services.cart_service import get_or_create_user_cart, change_or_create_cart_item
 
 
 def get_cache_key(product_id):
@@ -220,7 +220,7 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """
-        Add product seller id and price with min values
+        Add product seller id, sellers data and price with min values
         """
         context = super().get_context_data(**kwargs)
         product = self.get_object()
@@ -230,6 +230,18 @@ class ProductDetailView(DetailView):
             context['min_price_seller_id'] = min_price_seller.id
             context['min_price_seller_price'] = min_price_seller.price
 
+        sellers = self.object.sellers.all().select_related("seller")
+        sellers_data = []
+        for seller in sellers:
+            seller_data = {
+                'id': seller.id,
+                "name": seller.seller.name,
+                "price": seller.price,
+                "delivery_type": seller.get_delivery_type_display(),
+                "payment_type": seller.get_payment_type_display(),
+            }
+            sellers_data.append(seller_data)
+        context["sellers_data"] = sellers_data
         return context
 
 
@@ -238,7 +250,7 @@ class AddProductInCart(View):
     Add product in user cart
     """
     def post(self, request):
-        get_or_create_cart_items(request=request)
+        change_or_create_cart_item(request=request)
         return JsonResponse({'success': 'Product added to cart successfully'})
 
 

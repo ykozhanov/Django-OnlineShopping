@@ -16,14 +16,18 @@ def get_or_create_user_cart(request):
     return cart
 
 
-def get_or_create_cart_items(request):
-    """Get or create user cart items"""
+def change_or_create_cart_item(request):
+    """Change or create user cart items"""
     cart = get_or_create_user_cart(request=request)
     data = request.POST
     product_seller_id = data.get('product_seller_id')
-    quantity = data.get('amount')
+    quantity = int(data.get('amount'))
     product_seller = ProductSeller.objects.get(id=product_seller_id)
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product_seller=product_seller, defaults = {'quantity': quantity})
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product_seller=product_seller,
+        defaults = {'quantity': quantity}
+    )
     if not created:
-        cart_item.quantity = int(cart_item.quantity) + int(quantity)
+        cart_item.quantity += quantity
         cart_item.save()

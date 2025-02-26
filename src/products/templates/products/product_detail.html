@@ -110,7 +110,7 @@
 
                         <div class="Tabs-wrap">
                             <div class="Tabs-block" id="description">
-                                <h2>Megano Store Hystory </h2>
+                                <h2>{{product.name}} </h2>
 
                                 {% with product.description|separate_text_and_list as parts %}
                                 <p>{{ parts.text }}</p>
@@ -144,7 +144,7 @@
                                 </div>
                             </div>
 
-<!--                          Блок "продавцы" на детальной странице товара  % include 'products/Название_файла.html' % -->
+                            {% include 'products/seller_detail_on_product_page.html' %}
 
                             <div class="Tabs-block" id="addit">
                                 <div class="Product-props">
