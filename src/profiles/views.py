@@ -67,7 +67,7 @@ class CustomLogoutView(LogoutView):
 class UserRegistrationView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "login/registr.html"
-    success_url = reverse_lazy("homepage:index")
+    success_url = reverse_lazy("login")
 
 
 class CustomPasswordResetView(PasswordResetView):
