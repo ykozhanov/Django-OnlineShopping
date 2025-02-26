@@ -216,6 +216,11 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
 
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if "comparison_data" not in request.session:
+            request.session["comparison_data"] = []
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         """
         Add product seller id and price with min values

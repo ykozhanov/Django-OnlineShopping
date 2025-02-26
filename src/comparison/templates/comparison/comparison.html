@@ -1,4 +1,5 @@
 {% include 'base.html' %}
+{% load custom_get_item %}
 
 {% block meta %}
     <meta name="description" content="Страница сравнения товаров">
@@ -44,7 +45,7 @@
                                                             {% for characteristic_name, characteristic_data in comparison_data.items %}
                                                                 <tr>
                                                                     <td>{{ characteristic_name }}</td>
-                                                                    <td>{{ characteristic_data.product }}</td>
+                                                                    <td>{{ characteristic_data|get_item:product.name }}</td>
                                                                 </tr>
                                                             {% endfor %}
                                                         {% endif %}
@@ -58,6 +59,29 @@
                                         </div>
                                     </div>
                                 </div>
+                            <div class="ProductCard-info">
+                                <div class="ProductCard-cost">
+                                    <div class="ProductCard-price">$55.00
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ProductCard-cart">
+                                <div class="ProductCard-cartElement">
+                                    <a class="btn btn_primary" href="cart.html"> <!-- Изменить ссылку -->
+                                        <img class="btn-icon" src="assets/img/icons/card/cart_white.svg" alt="cart_white.svg" />
+                                        <span class="btn-content">Добавить в корзину</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="ProductCard-cart">
+                                <div class="ProductCard-cartElement">
+                                    <!-- Удаление товара из сравнения -->
+                                    <a class="btn btn_primary" href="#">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" />
+                                        <span class="btn-content" id="сomparison-button" data-item-id="{{ product.pk }}">Удалить из сравнения</span>
+                                    </a>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>
                     {% else %}
@@ -68,6 +92,34 @@
         </div>
     </div>
 {% endblock %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const сomparisonButton = document.querySelector("#сomparison-button");
+      const productId = сomparisonButton.getAttribute("data-item-id");
+
+      сomparisonButton.onclick = function () {
+        fetch(
+          "{% url 'comparison:comparison_delete' id=0 %}".replace(0, productId),
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+          }
+        )
+          .then((response) => {
+            if (response.ok) {
+              location.reload();
+            }
+          })
+          .catch((error) => {
+            console.error("Ошибка:", error);
+          });
+      };
+    });
+</script>
 
 {% include 'footer.html' %}
 {% include 'footer-about-item.html' %}

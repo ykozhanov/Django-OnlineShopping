@@ -66,6 +66,13 @@
                                             <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
                                             <span class="btn-content" id="buy-button">Купить</span>
                                         </a>
+<!--                                    Добавление товара в сравнение-->
+                                    {% if not product.pk not in request.session.comparison_data %}
+                                        <a class="btn btn_primary" href="#" id="comparison-a">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" />
+                                            <span class="btn-content" id="сomparison-button" data-item-id="{{ product.pk }}">Добавить в сравнение</span>
+                                        </a>
+                                    {% endif %}
                                 </div>
                                 <div id="modal_open" class="my_modal">
                                     <div class="my_modal-dialog">
@@ -208,6 +215,36 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         modal.style.display = 'none'; // Скрыть модальное окно
     });
+
+    const сomparisonButton = document.querySelector("#сomparison-button");
+    const comparisonA = document.querySelector("#comparison-a");
+    const productId = сomparisonButton.getAttribute("data-item-id");
+    const modalBodyEl = document.querySelector(".my_modal-body");
+
+    сomparisonButton.onclick = function () {
+        fetch(
+            "{% url 'comparison:comparison_add' id=0 %}".replace(0, productId),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+            }
+        )
+        .then((response) => {
+            if (response.ok) {
+                comparisonA.remove();
+                modalBodyElText = modalBodyEl.textContent;
+                modalBodyEl.textContent = "Товар успешно добавлен в сравнение!";
+                modal.style.display = "block";
+                modalBodyEl.textContent = modalBodyElText;
+            }
+        })
+        .catch((error) => {
+            console.error("Ошибка:", error);
+        });
+    };
 });
 </script>
 
