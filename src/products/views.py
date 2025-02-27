@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views import View
 from django.views.generic import DetailView
+from django.conf import settings
 # from django.core.cache import cache
 #
 # from .models import ReviewModel
@@ -197,6 +198,7 @@ class CatalogView(ListView):
         context.update(self.product_cache_service.get_price_range())
         context.update(self.filters_params)
         context["active_category_list"] = CategoryService.get_active_categories()
+        context["MEDIA_URL"] = settings.MEDIA_URL
         return context
 
     def build_filter_query_string(self) -> str:
@@ -218,15 +220,13 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
 
-    def get(self, request: HttpRequest, *args, **kwargs):
-        if "comparison_data" not in request.session:
-            request.session["comparison_data"] = []
-        return super().get(request, *args, **kwargs)
-
     def get_context_data(self, **kwargs):
         """
         Add product seller id, sellers data and price with min values
         """
+        if not "comparison_data" in self.request.session:
+            self.request.session["comparison_data"] = []
+
         context = super().get_context_data(**kwargs)
         product = self.get_object()
         sellers = product.sellers.all()

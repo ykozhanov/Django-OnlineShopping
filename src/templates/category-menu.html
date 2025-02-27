@@ -10,7 +10,7 @@
                         <div class="CategoriesButton-icon">
                             {% if category.icon %}
                                 {% with "/media/"|add:category.icon.name as icon_path %}
-                                        <img src="{{ icon_path }}" alt="{{ category.name }}" />
+                                        <img src="{{ icon_path }}" alt="{{ category.name }}" width="50px" height="50px"/>
                                 {% endwith %}
                             {% endif %}
                         </div>

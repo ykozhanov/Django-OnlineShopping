@@ -6,23 +6,45 @@ from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 
-from products.models import Product
+from sellers.models import ProductSeller
 from .services import ComparisonService
 
 
-def compare_products(products: QuerySet[Product]) -> dict[str, Any]:
+# def compare_products(products: QuerySet[Product]) -> dict[str, Any]:
+#     if products:
+#         common_characteristics = set(products[0].characteristic_values.all())
+#         for product in products[1:]:
+#             common_characteristics.intersection_update(product.characteristic_values.all())
+#         comparison_data = {}
+#         for characteristic in common_characteristics:
+#             comparison_data[characteristic] = {
+#                 product.name: product.characteristics[characteristic]
+#                 for product in products
+#             }
+#         return comparison_data
+#     return dict()
+
+def compare_products(products: QuerySet[ProductSeller]) -> dict[str, Any]:
     if products:
-        common_characteristics = set(products[0].characteristic_values.keys())
+        # Получаем все характеристики первого продукта
+        first_product_characteristics = products[0].product.characteristic_values.all()
+        common_characteristics = set(first_product_characteristics.values_list('characteristic__name', flat=True))
+
+        # Перебираем остальные продукты и обновляем пересечение характеристик
         for product in products[1:]:
-            common_characteristics.intersection_update(product.characteristic_values.keys())
+            product_characteristics = product.product.characteristic_values.all()
+            product_keys = set(product_characteristics.values_list('characteristic__name', flat=True))
+            common_characteristics.intersection_update(product_keys)
+
+        # Формируем данные для сравнения
         comparison_data = {}
         for characteristic in common_characteristics:
             comparison_data[characteristic] = {
-                product.name: product.characteristics[characteristic]
+                product.product.name: product.product.characteristic_values.get(characteristic__name=characteristic).value
                 for product in products
             }
         return comparison_data
-    return dict()
+    return {}
 
 
 class ComparisonView(LoginRequiredMixin, View):

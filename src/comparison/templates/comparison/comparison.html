@@ -1,5 +1,6 @@
 {% include 'base.html' %}
 {% load custom_get_item %}
+{% load static %}
 
 {% block meta %}
     <meta name="description" content="Страница сравнения товаров">
@@ -16,73 +17,90 @@
                 <div class="ProductCard">
                     {% if products %}
                         <div class="ProductCard-desc">
-                            {% for product in products %}
-                                <h2 class="ProductCard-title">{{ product.name }}</h2>
-                                <div class="ProductCard-look">
-                                    <div class="ProductCard-photo">
-                                        <img src="{{ product.image_url }}" alt="{{ product.name }}" />
+                            <div class="ProductCard-header">
+                                {% for product in products %}
+                                    <h2 class="ProductCard-title">{{ product.product.name }}</h2>
+                                    <div class="ProductCard-look">
+                                        <div class="ProductCard-photo">
+                                            <img src="{{ product.product.image.url }}" alt="{{ product.product.name }}"/>
+                                        </div>
+                                    </div>
+                                    <div class="Tabs Tabs_default">
+                                        <div class="Tabs-wrap">
+                                            <div class="Tabs-block">
+                                                <div class="table">
+                                                    <table>
+                                                        <tr>
+                                                            <th class="hed">Характеристика</th>
+                                                            <th class="hed">Значение</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Общие параметры</b></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        {% if comparison_data %}
+                                                            {% if products|length < 2 %}
+                                                                <tr>
+                                                                    <td colspan="2">Добавьте, пожалуйста, больше товаров для сравнения.</td>
+                                                                </tr>
+                                                            {% else %}
+                                                                {% for characteristic_name, characteristic_data in comparison_data.items %}
+                                                                    <tr>
+                                                                        <td>{{ characteristic_name }}</td>
+                                                                        <td>{{ characteristic_data|get_item:product.product.name }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="2">
+                                                                    <p>Невозможно сравнить товары, у них нет общих характеристик.</p>
+                                                                    <p>"Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</p>
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <div class="ProductCard-info">
+                                    <div class="ProductCard-cost">
+                                        <div class="ProductCard-price">{{ product.price }} &#8381;
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="Tabs Tabs_default">
-                                    <div class="Tabs-wrap">
-                                        <div class="Tabs-block">
-                                            <div class="table">
-                                                <table>
-                                                    <tr>
-                                                        <th class="hed">Характеристика</th>
-                                                        <th class="hed">Значение</th>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><b>Общие параметры</b></td>
-                                                        <td></td>
-                                                    </tr>
-                                                    {% if comparison_data %}
-                                                        {% if comparison_data|length < 2 %}
-                                                            <tr>
-                                                                <td colspan="2">Добавьте, пожалуйста, больше товаров для сравнения.</td>
-                                                            </tr>
-                                                        {% else %}
-                                                            {% for characteristic_name, characteristic_data in comparison_data.items %}
-                                                                <tr>
-                                                                    <td>{{ characteristic_name }}</td>
-                                                                    <td>{{ characteristic_data|get_item:product.name }}</td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <tr>
-                                                            <td colspan="2">Невозможно сравнить товары, у них нет общих характеристик. "Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</td>
-                                                        </tr>
-                                                    {% endif %}
-                                                </table>
+                                <div class="ProductCard-cart">
+                                    <div class="ProductCard-cartElement">
+                                        <a class="btn btn_primary btn_buy" href="#" data-item-id="{{ product.pk }}">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="Белая корзина" />
+                                            <span class="btn-content">Добавить в корзину</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ProductCard-cart">
+                                    <div class="ProductCard-cartElement">
+                                        <a class="btn btn_primary btn_comparison_del" href="#" data-item-id="{{ product.pk }}">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                            <span class="btn-content">Удалить из сравнения</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div id="modal_open" class="my_modal">
+                                    <div class="my_modal-dialog">
+                                        <div class="my_modal-content">
+                                            <div class="my_modal-header">
+                                                <p class="my_modal-title">Поздравляем!</p>
+                                                <a href="#" title="Закрыть модальное окно" class="close">×</a>
+                                            </div>
+                                            <div class="my_modal-body">
+                                                <p>Товар успешно добавлен в корзину!</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            <div class="ProductCard-info">
-                                <div class="ProductCard-cost">
-                                    <div class="ProductCard-price">$55.00
-                                    </div>
-                                </div>
+                                {% endfor %}
                             </div>
-                            <div class="ProductCard-cart">
-                                <div class="ProductCard-cartElement">
-                                    <a class="btn btn_primary" href="cart.html"> <!-- Изменить ссылку -->
-                                        <img class="btn-icon" src="assets/img/icons/card/cart_white.svg" alt="cart_white.svg" />
-                                        <span class="btn-content">Добавить в корзину</span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="ProductCard-cart">
-                                <div class="ProductCard-cartElement">
-                                    <!-- Удаление товара из сравнения -->
-                                    <a class="btn btn_primary" href="#">
-                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" />
-                                        <span class="btn-content" id="сomparison-button" data-item-id="{{ product.pk }}">Удалить из сравнения</span>
-                                    </a>
-                                </div>
-                            </div>
-                            {% endfor %}
                         </div>
                     {% else %}
                         <h2 class="ProductCard-title">Нет товаров для сравнения</h2>
@@ -94,32 +112,73 @@
 {% endblock %}
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const сomparisonButton = document.querySelector("#сomparison-button");
-      const productId = сomparisonButton.getAttribute("data-item-id");
+document.addEventListener("DOMContentLoaded", () => {
+  const closeButton = document.querySelector('.close');
+  const buttonsCom = document.querySelectorAll('.btn_comparison_del');
+  const buyButtons = document.querySelectorAll('.btn_buy');
+  const modal = document.querySelector('#modal_open');
 
-      сomparisonButton.onclick = function () {
-        fetch(
-          "{% url 'comparison:comparison_delete' id=0 %}".replace(0, productId),
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": "{{ csrf_token }}",
-            },
-          }
-        )
-          .then((response) => {
-            if (response.ok) {
-              location.reload();
-            }
-          })
-          .catch((error) => {
-            console.error("Ошибка:", error);
-          });
-      };
+  buttonsCom.forEach(button => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const productId = button.getAttribute("data-item-id");
+      const url = "{% url 'comparison:comparison_delete' product_id=0 %}".replace("0", productId);
+
+      fetch(url, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+      })
+      .then((response) => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          console.error("Ошибка при удалении товара из сравнения:", response.statusText);
+        }
+      })
+      .catch((error) => {
+        console.error("Ошибка:", error);
+      });
     });
+  });
+
+  buyButtons.forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      const productSellerId = button.getAttribute('data-item-id');
+      const amount = "1"; // Добавляем один товар
+
+      fetch("{% url 'products:addproduct' %}", {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: new URLSearchParams({
+              product_seller_id: productSellerId,
+              amount: amount
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+            modal.style.display = 'block'; // Показать модальное окно
+        })
+        .catch(error => {
+            console.error('Ошибка при добавлении товара в корзину:', error);
+        });
+      });
+    });
+
+  closeButton.addEventListener('click', function(event) {
+    event.preventDefault();
+    modal.style.display = 'none'; // Скрыть модальное окно
+    location.reload();
+  });
+});
 </script>
 
 {% include 'footer.html' %}
-{% include 'footer-about-item.html' %}

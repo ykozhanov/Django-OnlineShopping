@@ -11,12 +11,28 @@
                                     {{ seller.name }} {{ seller.id }}
                                 </a>
                                 <div class="ProductCard-cartElement" style="margin-top: 10px;">
-                                    <a class="btn btn_primary" href="#modal_open" data-seller-id="{{ seller.id }}">
+                                    <a class="btn btn_primary btn_buy" href="#" data-seller-id="{{ seller.id }}">
                                         <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}"
                                              alt="cart_white.svg"/>
                                         <span class="btn-content">Купить</span>
                                     </a>
                                 </div>
+                                <!-- Добавление товара в сравнение-->
+                                {% if not seller.id in request.session.comparison_data %}
+                                <div>
+                                    <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ seller.id }}" style="margin-top: 10px;">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                        <span class="btn-content">Сравнить</span>
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div>
+                                    <a class="btn btn_primary btn_comparison_del" href="#" data-item-id="{{ seller.id }}" style="margin-left: 10px;">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                        <span class="btn-content">Не сравнивать</span>
+                                    </a>
+                                </div>
+                                {% endif %}
 
                                 <div id="modal_open" class="my_modal">
                                     <div class="my_modal-dialog">
@@ -60,15 +76,15 @@
         </div>
     </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const buyButtons = document.querySelectorAll('.btn_primary');
+    const buyButtons = document.querySelectorAll('.btn_buy');
     const modal = document.getElementById('modal_open');
     const closeButton = document.querySelector('.close');
 
     buyButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
             const productSellerId = this.getAttribute('data-seller-id'); // Получаем seller.id
             const amount = "1";
 
@@ -97,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
     closeButton.addEventListener('click', function(event) {
         event.preventDefault();
         modal.style.display = 'none'; // Скрыть модальное окно
+        location.reload();
     });
 });
 </script>

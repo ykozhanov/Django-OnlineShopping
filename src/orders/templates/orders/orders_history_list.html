@@ -17,12 +17,10 @@
                     <div class="Section-columnContent">
                         <div class="NavigateProfile">
                             <ul class="menu menu_vt">
-                                <li class="menu-item"><a class="menu-link" href="{% url 'profiles:profile' %}">Личный кабинет</a>
-                                </li>
-                                <li class="menu-item"><a class="menu-link" href="{% url 'profiles:profile_edit' %}">Профиль</a>
-                                </li>
-                                <li class="menu-item_ACTIVE menu-item"><a class="menu-link" href="{% url 'orders:orders_history_list' %}">История заказов</a>
-                                </li>
+                                <li class="menu-item"><a class="menu-link" href="{% url 'profiles:profile' %}">Личный кабинет</a></li>
+                                <li class="menu-item"><a class="menu-link" href="{% url 'profiles:profile_edit' %}">Профиль</a></li>
+                                <li class="menu-item"><a class="menu-link" href="{% url 'profiles:product_history' %}">История просмотров</a></li>
+                                <li class="menu-item_ACTIVE menu-item"><a class="menu-link" href="{% url 'orders:orders_history_list' %}">История заказов</a></li>
 
                             </ul>
                         </div>
@@ -31,6 +29,7 @@
             </div>
             <div class="Section-content">
                 <div class="Orders">
+                    {% if orders %}
                     {% for order in orders %}
                     <div class="Order Order_anons">
                         <div class="Order-personal">
@@ -76,6 +75,9 @@
                         </div>
                     </div>
                     {% endfor %}
+                    {% else %}
+                    <p>Заказов пока нет</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

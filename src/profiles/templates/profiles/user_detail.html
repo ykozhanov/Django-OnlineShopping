@@ -44,6 +44,7 @@
                                 <div class="Order Order_anons">
                                     <div class="Order-personal">
                                         <div class="row">
+                                            {% if order %}
                                             <div class="row-block"><a class="Order-title" href="{% url 'orders:orders_history_detail' id=order.id %}">Заказ <span class="Order-numberOrder">№{{ order.id }}</span> от <span class="Order-dateOrder">{{ order.created_at|date:"d.m.Y" }}</span></a>
                                                 <div class="Account-editLink"><a href="{% url 'orders:orders_history_list' %}">История заказов</a>
                                                 </div>
@@ -82,6 +83,9 @@
                                                 </div>
                                                 {% endif %}
                                             </div>
+                                            {% else %}
+                                            <p>Заказов пока нет</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
