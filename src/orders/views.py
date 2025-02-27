@@ -189,7 +189,8 @@ class OrderPaymentProgressView(BaseOrderView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(request=request)
         user = context.get('user')
-        user.cart.items.clear()  # отвязываем товары от корзины
+        # user.cart.items.clear() # отвязываем товары от корзины
+        user.cart.items.all().delete() #удаляем товары от корзины
         order = request.session['order']
         payment = ServiceForPayment(order_pk=order['pk'], card_number=order['card_number'],
                                     total_cost=order['total_cost'], request=request)
