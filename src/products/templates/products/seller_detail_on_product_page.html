@@ -19,7 +19,7 @@
                                 </div>
 
                                 {% if user.is_authenticated %}
-                                {% if not seller.id in request.session.comparison_data %}
+                                {% if seller.id not in request.session.comparison_data %}
                                 <div>
                                     <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ seller.id }}" style="margin-top: 10px;">
                                         <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>

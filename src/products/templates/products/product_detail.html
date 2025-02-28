@@ -68,7 +68,7 @@
                                         </a>
                                 </div>
                                 {% if user.is_authenticated %}
-                                {% if not min_price_seller_id in request.session.comparison_data %}
+                                {% if min_price_seller_id not in request.session.comparison_data %}
                                 <div>
                                     <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ min_price_seller_id }}" style="margin-left: 10px;">
                                         <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>

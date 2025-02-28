@@ -224,9 +224,6 @@ class ProductDetailView(DetailView):
         """
         Add product seller id, sellers data and price with min values
         """
-        if not "comparison_data" in self.request.session:
-            self.request.session["comparison_data"] = []
-
         context = super().get_context_data(**kwargs)
         product = self.get_object()
         sellers = product.sellers.all()
@@ -247,6 +244,8 @@ class ProductDetailView(DetailView):
             }
             sellers_data.append(seller_data)
         context["sellers_data"] = sellers_data
+        if "comparison_data" not in self.request.session:
+            self.request.session["comparison_data"] = []
         return context
 
 
