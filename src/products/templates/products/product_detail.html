@@ -67,6 +67,7 @@
                                             <span class="btn-content" id="buy-button">Купить</span>
                                         </a>
                                 </div>
+                                {% if user.is_authenticated %}
                                 {% if not min_price_seller_id in request.session.comparison_data %}
                                 <div>
                                     <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ min_price_seller_id }}" style="margin-left: 10px;">
@@ -81,6 +82,7 @@
                                         <span class="btn-content">Не сравнивать</span>
                                     </a>
                                 </div>
+                                {% endif %}
                                 {% endif %}
                                 <div id="modal_open" class="my_modal">
                                     <div class="my_modal-dialog">

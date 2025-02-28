@@ -17,7 +17,8 @@
                                         <span class="btn-content">Купить</span>
                                     </a>
                                 </div>
-                                <!-- Добавление товара в сравнение-->
+
+                                {% if user.is_authenticated %}
                                 {% if not seller.id in request.session.comparison_data %}
                                 <div>
                                     <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ seller.id }}" style="margin-top: 10px;">
@@ -32,6 +33,7 @@
                                         <span class="btn-content">Не сравнивать</span>
                                     </a>
                                 </div>
+                                {% endif %}
                                 {% endif %}
 
                                 <div id="modal_open" class="my_modal">

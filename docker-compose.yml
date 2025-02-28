@@ -4,7 +4,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - app:/app
+    environment:
+      - PYTHONPATH=/app:/app/src/
     env_file:
       - .env
     networks:
@@ -21,3 +23,6 @@ services:
 networks:
   my-network:
     driver: bridge
+
+volumes:
+  app:
