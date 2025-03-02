@@ -47,7 +47,7 @@ def split_sentence(value):
     """
     Split the text into sentences based on .!?
     """
-    sentence = re.split(r"(?<=[.!?]) +", value)
+    sentence = re.split(r"(?<=[.!?;]) +", value)
     return sentence
 
 

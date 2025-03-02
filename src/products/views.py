@@ -6,8 +6,8 @@ from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse, Http404
 from django.views import generic
 from django.views.generic import ListView
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+# from django.db.models.signals import post_save, post_delete
+# from django.dispatch import receiver
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
@@ -18,11 +18,13 @@ from django.core.cache import cache
 from .models import ReviewModel
 from cart.cart_manager import CartManager
 from sellers.models import ProductSeller
+from cart.models import Cart, CartItem
 from .filter_service import FilterService
 from .models import Product
 from .forms import ReviewForm
 from .services.category_service import CategoryService
 from .services.product_service import get_product_cache_service
+from .services.cart_service import get_or_create_user_cart, change_or_create_cart_item
 
 
 def get_cache_key(product_id):
@@ -218,9 +220,14 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
 
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if "comparison_data" not in request.session:
+            request.session["comparison_data"] = []
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         """
-        Add product seller id and price with min values
+        Add product seller id, sellers data and price with min values
         """
         context = super().get_context_data(**kwargs)
         product = self.get_object()
@@ -230,12 +237,24 @@ class ProductDetailView(DetailView):
             context['min_price_seller_id'] = min_price_seller.id
             context['min_price_seller_price'] = min_price_seller.price
 
+        sellers = self.object.sellers.all().select_related("seller")
+        sellers_data = []
+        for seller in sellers:
+            seller_data = {
+                'id': seller.id,
+                "name": seller.seller.name,
+                "price": seller.price,
+                "delivery_type": seller.get_delivery_type_display(),
+                "payment_type": seller.get_payment_type_display(),
+            }
+            sellers_data.append(seller_data)
+        context["sellers_data"] = sellers_data
         return context
 
 
 class AddProductInCart(View):
     """
-    Класс заглушка для добавления товара в корзину (нужно будет изменить после создания модели корзины)
+    Add product in user cart
     """
     def post(self, request):
         data = json.loads(request.body)
@@ -256,4 +275,5 @@ class AddProductInCart(View):
         
         cart_manager.add_item(product=product_seller, quantity=amount)
         return JsonResponse({'success': 'Product added to cart successfully'})
+
 
