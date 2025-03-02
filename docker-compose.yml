@@ -4,13 +4,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - app:/app
     environment:
       - PYTHONPATH=/app:/app/src/
     env_file:
       - .env
     networks:
       - my-network
+    depends_on:
+      - db
 
   redis:
     image: redis:7.4.2
@@ -20,9 +22,24 @@ services:
     networks:
       - my-network
 
+  db:
+    image: postgres:17.4
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+
 networks:
   my-network:
     driver: bridge
-#
-#volumes:
-#  app:
+
+volumes:
+  app:
+  db:
