@@ -104,7 +104,10 @@ class DiscountsManager:
             if not price:
                 # Берется максимальная цена по продавцам товара
                 product_sallers: list[ProductSeller] = ProductSeller.objects.filter(product=product)
-                price: float = max([product_saller.price for product_saller in product_sallers])
+                if product_sallers:
+                    price: float = max([product_saller.price for product_saller in product_sallers])
+                else:
+                    price = None
 
             if not discounts:
                 discount_prices[product] = price

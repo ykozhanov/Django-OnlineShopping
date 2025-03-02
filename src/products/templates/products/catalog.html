@@ -5,8 +5,8 @@
 
 {% block content %}
 
-{# % include 'header-top.html' % #}
-{# % include 'header-main.html' % #}
+{% include 'header-top.html' %}
+{% include 'header-main.html' %}
 {% include 'header-search.html' %}
 
     <div class="Middle Middle_top">
@@ -84,9 +84,9 @@
 
                     <div class="Cards">
                         {% for product in object_list %}
-                            <div class="Card"><a class="Card-picture" href="#"><img src="{% static product.image %}" alt="card.jpg" /></a>
+                            <div class="Card"><a class="Card-picture" href="#"><img src="{{ MEDIA_URL }}/{{ product.image }}" alt="card.jpg" /></a>
                                 <div class="Card-content">
-                                    <strong class="Card-title"><a href="product.html">{{ product.name }}</a>
+                                    <strong class="Card-title"><a href="{% url 'products:product_detail' pk=product.id %}">{{ product.name }}</a>
                                     </strong>
                                     <div class="Card-description">
                                         <div class="Card-cost"><span class="Card-price">{{ product.avg_price }}</span>

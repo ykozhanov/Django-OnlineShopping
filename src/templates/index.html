@@ -12,6 +12,7 @@
     {% endif %}
     {% include 'header-main.html' %}
     {% include 'header-search.html' %}
+    {% if banners %}
     <div class="Header-slider">
         <div class="Slider Slider_main">
           <div class="Slider-box">
@@ -40,6 +41,7 @@
           </div>
         </div>
     </div>
+    {% endif %}
     <div class="Middle">
         <div class="Section">
             <div class="wrap">
@@ -113,6 +115,7 @@
                     </div>
                 </div>
                 {% endif %}
+                {% if top_products %}
                 <div class="Section-content">
                     <header class="Section-header">
                         <h2 class="Section-title">Популярные товары
@@ -141,8 +144,10 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
+        {% if limit_edition_products %}
         <div class="Section Section_column Section_columnRight">
             <div class="wrap">
                 <div class="Section-content">
@@ -184,6 +189,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
     {% include 'footer.html' %}
 {% endblock %}

@@ -14,7 +14,19 @@
             <h3 class="sign-in">Вход</h3>
         </div>
         <div class="clear">
-            <form action="{% url 'profiles:login'%}" method="post">
+            {% if form.errors or form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <form action="{% url 'profiles:login'%}" method="post" style="margin-top: 15px;">
                 {% csrf_token %}
                 <div>
                     {{ form.email.errors }}
@@ -28,9 +40,7 @@
                     <input type="submit" value="Войти" />
                 </div>
                 <a class="forgot-label" href="{% url 'profiles:password_reset' %}">Забыли пароль?</a>
-                <a class="registr" href="{% url 'profiles:register' %}">
-                    Регистрация
-                </a>
+                <a class="registr" href="{% url 'profiles:register' %}">Регистрация</a>
             </form>
         </div>
     </div>

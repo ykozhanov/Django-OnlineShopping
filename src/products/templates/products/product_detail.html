@@ -62,18 +62,28 @@
                                     </div>
                                 </div>
                                 <div class="ProductCard-cartElement">
-                                        <a class="btn btn_primary" href="#modal_open">
+                                        <a class="btn btn_primary" href="#">
                                             <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
                                             <span class="btn-content" id="buy-button">Купить</span>
                                         </a>
-<!--                                    Добавление товара в сравнение-->
-                                    {% if not product.pk not in request.session.comparison_data %}
-                                        <a class="btn btn_primary" href="#" id="comparison-a">
-                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" />
-                                            <span class="btn-content" id="сomparison-button" data-item-id="{{ product.pk }}">Добавить в сравнение</span>
-                                        </a>
-                                    {% endif %}
                                 </div>
+                                {% if user.is_authenticated %}
+                                {% if min_price_seller_id not in request.session.comparison_data %}
+                                <div>
+                                    <a class="btn btn_primary btn_comparison" href="#" data-item-id="{{ min_price_seller_id }}" style="margin-left: 10px;">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                        <span class="btn-content">Сравнить</span>
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div>
+                                    <a class="btn btn_primary btn_comparison_del" href="#" data-item-id="{{ min_price_seller_id }}" style="margin-left: 10px;">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                        <span class="btn-content">Не сравнивать</span>
+                                    </a>
+                                </div>
+                                {% endif %}
+                                {% endif %}
                                 <div id="modal_open" class="my_modal">
                                     <div class="my_modal-dialog">
                                         <div class="my_modal-content">
@@ -173,79 +183,105 @@
 
             </div>
         </div>
-    </div>
+<!--    </div>-->
     {% include 'footer.html' %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const amountInput = document.getElementById('amount-input');
-    const buyButton = document.getElementById('buy-button');
-    const modal = document.getElementById('modal_open');
-    const closeButton = document.querySelector('.close');
+  const amountInput = document.getElementById('amount-input');
+  const buyButton = document.getElementById('buy-button');
+  const modal = document.getElementById('modal_open');
+  const closeButton = document.querySelector('.close');
 
-    // Отправка POST-запроса при нажатии на кнопку "Купить"
-    buyButton.addEventListener('click', function() {
-        const productSellerId = "{{min_price_seller_id}}";
-        const amount = amountInput.value;
+  // Отправка POST-запроса при нажатии на кнопку "Купить"
+  buyButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      const productSellerId = "{{min_price_seller_id}}";
+      const amount = amountInput.value;
 
-        fetch("{% url 'products:addproduct' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: new URLSearchParams({
-                product_seller_id: productSellerId,
-                amount: amount
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Обработка успешного ответа
-            modal.style.display = 'block'; // Показать модальное окно
-        })
-        .catch(error => {
-            // Обработка ошибки
-            console.error('Ошибка при добавлении товара в корзину:', error);
-        });
+      fetch("{% url 'products:addproduct' %}", {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: new URLSearchParams({
+              product_seller_id: productSellerId,
+              amount: amount
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          // Обработка успешного ответа
+          modal.style.display = 'block'; // Показать модальное окно
+      })
+      .catch(error => {
+          // Обработка ошибки
+          console.error('Ошибка при добавлении товара в корзину:', error);
+      });
+  });
+
+  // Закрытие модального окна
+  closeButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      modal.style.display = 'none'; // Скрыть модальное окно
+      location.reload();
+  });
+
+  const сomparisonButtons = document.querySelectorAll(".btn_comparison");
+  сomparisonButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const productId = button.getAttribute("data-item-id");
+      const url = "{% url 'comparison:comparison_add' product_id=0 %}".replace("0", productId);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+      })
+      .then((response) => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          console.error("Ошибка при добавлении товара в сравнение:", response.statusText);
+        }
+      })
+      .catch((error) => {
+          console.error("Ошибка:", error);
+      });
     });
+  });
+  const сomparisonButtonsDel = document.querySelectorAll(".btn_comparison_del");
+  сomparisonButtonsDel.forEach(button => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
 
-    // Закрытие модального окна
-    closeButton.addEventListener('click', function(event) {
-        event.preventDefault();
-        modal.style.display = 'none'; // Скрыть модальное окно
+      const productId = button.getAttribute("data-item-id");
+      const url = "{% url 'comparison:comparison_delete' product_id=0 %}".replace("0", productId);
+
+      fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+      })
+      .then((response) => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          console.error("Ошибка при удалении товара из сравнения:", response.statusText);
+        }
+      })
+      .catch((error) => {
+          console.error("Ошибка:", error);
+      });
     });
-
-    const сomparisonButton = document.querySelector("#сomparison-button");
-    const comparisonA = document.querySelector("#comparison-a");
-    const productId = сomparisonButton.getAttribute("data-item-id");
-    const modalBodyEl = document.querySelector(".my_modal-body");
-
-    сomparisonButton.onclick = function () {
-        fetch(
-            "{% url 'comparison:comparison_add' id=0 %}".replace(0, productId),
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}",
-                },
-            }
-        )
-        .then((response) => {
-            if (response.ok) {
-                comparisonA.remove();
-                modalBodyElText = modalBodyEl.textContent;
-                modalBodyEl.textContent = "Товар успешно добавлен в сравнение!";
-                modal.style.display = "block";
-                modalBodyEl.textContent = modalBodyElText;
-            }
-        })
-        .catch((error) => {
-            console.error("Ошибка:", error);
-        });
-    };
+  });
 });
 </script>
-
 {% endblock %}
