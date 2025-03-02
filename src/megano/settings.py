@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-tbdyk+fvh3aym&#g4&%49k96ru0amx%fbjeov(abim0+zuzm56")
+SECRET_KEY = "django-insecure-tbdyk+fvh3aym&#g4&%49k96ru0amx%fbjeov(abim0+zuzm56"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
@@ -53,8 +53,18 @@ INSTALLED_APPS = [
     "paymentapi.apps.PaymentapiConfig",
     "discounts.apps.DiscountsConfig",
 ]
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'UTC'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-random-product': {
+        'task': 'megano.tasks.update_random_product_task',
+        'schedule': crontab(minute=0, hour=0),  # Каждый день в полночь
+    },
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

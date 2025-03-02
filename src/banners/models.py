@@ -5,6 +5,7 @@ class Banner(models.Model):
     image = models.ImageField(upload_to='banners/', verbose_name='Изображение')
     link = models.URLField(max_length=200, verbose_name='Ссылка', blank=True)
     is_active = models.BooleanField(default=True, verbose_name='Активен')
+    description = models.TextField(verbose_name='Banner description', null=True, blank=True)
 
     def __str__(self):
         return self.title

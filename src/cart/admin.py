@@ -54,7 +54,7 @@ class CartItemAdmin(admin.ModelAdmin):
 
         url = f'/admin/{obj.cart._meta.app_label}/{obj.cart._meta.model_name}/{obj.cart.pk}/'
         return format_html('<a href="{}">{}</a>', url, obj.cart)
-    
+
     def get_product_seller_ref(self, obj):
         """Get related product_seller ref"""
         url = f'/admin/{obj.product_seller._meta.app_label}/{obj.product_seller._meta.model_name}/{obj.product_seller.pk}/'

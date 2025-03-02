@@ -1,8 +1,9 @@
+import json
 from typing import Any
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, Http404
 from django.views import generic
 from django.views.generic import ListView
 # from django.db.models.signals import post_save, post_delete
@@ -16,6 +17,10 @@ from django.conf import settings
 # from django.core.cache import cache
 #
 # from .models import ReviewModel
+from django.core.cache import cache
+
+from .models import ReviewModel
+from cart.cart_manager import CartManager
 from sellers.models import ProductSeller
 from cart.models import Cart, CartItem
 from .filter_service import FilterService
@@ -220,6 +225,11 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
 
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if "comparison_data" not in request.session:
+            request.session["comparison_data"] = []
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         """
         Add product seller id, sellers data and price with min values
@@ -244,8 +254,6 @@ class ProductDetailView(DetailView):
             }
             sellers_data.append(seller_data)
         context["sellers_data"] = sellers_data
-        if "comparison_data" not in self.request.session:
-            self.request.session["comparison_data"] = []
         return context
 
 

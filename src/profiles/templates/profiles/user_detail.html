@@ -39,6 +39,7 @@
                                 <a class="Account-editLink" href="{% url 'profiles:profile_edit' %}">Редактировать профиль</a>
                             </div>
                         </div>
+                        {% if order %}
                         <div class="Account-group">
                             <div class="Account-column Account-column_full">
                                 <div class="Order Order_anons">
@@ -91,6 +92,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %  }
                     </div>
                 </div>
             </div>
