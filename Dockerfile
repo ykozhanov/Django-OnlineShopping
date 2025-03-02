@@ -5,9 +5,12 @@ WORKDIR /app
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y supervisor netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
+COPY supervisord.ini /etc/supervisor/conf.d/supervisord.ini
 
 EXPOSE 8000
 
-CMD ["bash", "src/start.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.ini"]

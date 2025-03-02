@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, update_session_auth_hash, g
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm, SetPasswordForm, PasswordResetForm
 from django import forms
 
+
 User = get_user_model()
 
 
@@ -99,34 +100,44 @@ class CustomUserEditForm(UserChangeForm):
         return user
 
 
-class CustomLoginForm(AuthenticationForm):
-    email = forms.EmailField(label='E-mail')
-
-    class Meta:
-        model = User
-        fields = ['email', 'password']
+class CustomLoginForm(forms.Form):
+    email = forms.EmailField(
+        label='E-mail',
+        max_length=254,
+        widget=forms.EmailInput(
+            attrs={
+                'class': 'user-input',
+                'placeholder': 'E-mail',
+            }
+        )
+    )
+    password = forms.CharField(
+        label='Пароль',
+        widget=forms.PasswordInput(
+            attrs={
+                'placeholder': 'Пароль',
+            }
+        )
+    )
 
     def __init__(self, *args, **kwargs):
-        super(CustomLoginForm, self).__init__(*args, **kwargs)
-        self.fields['email'].widget.attrs.update({'class': 'user-input', 'placeholder': 'E-mail'})
-        self.fields['password'].widget.attrs.update({'placeholder': 'Пароль'})
-        self.fields.pop('username', None)
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+        if not authenticate(request=self.request, email=email, password=password):
+            raise forms.ValidationError('Неверная почта или пароль')
+        return cleaned_data
+
+    def get_user(self):
         email = self.cleaned_data.get('email')
-        password = self.cleaned_data.get('password')
-
-        if email and password:
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                raise forms.ValidationError("Неверный email.")
-
-            if not user.check_password(password):
-                raise forms.ValidationError("Неверный пароль.")
-
-            self.cleaned_data['user'] = user
-        return self.cleaned_data
+        try:
+            return User.objects.get(email=email)
+        except User.DoesNotExist:
+            return None
 
 
 class CustomPasswordResetForm(PasswordResetForm):

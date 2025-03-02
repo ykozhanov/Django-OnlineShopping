@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     "paymentapi.apps.PaymentapiConfig",
     "discounts.apps.DiscountsConfig",
 ]
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_TIMEZONE = 'UTC'
 
 from celery.schedules import crontab
@@ -107,9 +107,13 @@ WSGI_APPLICATION = "megano.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME", "megano_db"),  # имя базы данных
+        "USER": os.getenv("DB_USER", "admin"),  # имя пользователя
+        "PASSWORD": os.getenv("DB_PASSWORD", "admin"),  # пароль
+        "HOST": os.getenv("DB_HOST", "db"),  # или IP-адрес сервера базы данных
+        "PORT": os.getenv("DB_PORT", "5432"),  # порт
+    },
 }
 
 

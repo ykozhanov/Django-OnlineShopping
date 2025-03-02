@@ -53,12 +53,12 @@ def user_profile_edit_view(request):
 class CustomLoginView(LoginView):
     form_class = CustomLoginForm
     template_name = "login/login.html"
-    success_url = reverse_lazy("homepage:index")
-    
-    def form_valid(self, form):
-        user = form.cleaned_data.get('user')
-        login(self.request, user)
-        return super().form_valid(form)
+    success_url = reverse_lazy("index")
+
+    # def form_valid(self, form):
+    #     user = form.cleaned_data.get('user')
+    #     login(self.request, user)
+    #     return super().form_valid(form)
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy("profiles:login")
@@ -67,7 +67,7 @@ class CustomLogoutView(LogoutView):
 class UserRegistrationView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "login/registr.html"
-    success_url = reverse_lazy("login")
+    success_url = reverse_lazy("profiles:login")
 
 
 class CustomPasswordResetView(PasswordResetView):

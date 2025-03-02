@@ -46,29 +46,36 @@ class IndexView(TemplateView):
             product_prices = []
             for product in category.products.all():
                 product_prices.extend([product_seller.price for product_seller in product.sellers.all()])
-            min_price = min(product_prices)
+            min_price = min(product_prices) if product_prices else None
             top_categories.append({'obj': category, 'min_price': min_price})
         
         # Блок с предложением дня
         day_offer: dict = DayOfferService.get_random_product()
         day_offer_product = day_offer.get('day_offer_product')
-        day_offer_product_price = min(seller.price for seller in day_offer_product.sellers.all())
-        products_discounts = DiscountsManager().calculate_products_prices(
-            {day_offer_product: day_offer_product_price}
-        )
-        day_offer_product_discount_price = products_discounts.get(day_offer_product)
-        if day_offer_product_discount_price >= day_offer_product_price:
+        if day_offer_product:
+            day_offer_product_price = min(seller.price for seller in day_offer_product.sellers.all())
+            products_discounts = DiscountsManager().calculate_products_prices(
+                {day_offer_product: day_offer_product_price}
+            )
+            day_offer_product_discount_price = products_discounts.get(day_offer_product)
+            if day_offer_product_discount_price >= day_offer_product_price:
+                day_offer_product_discount_price = None
+        else:
+            day_offer_product_price = None
             day_offer_product_discount_price = None
-        
-        finished_at: datetime = day_offer.get('finished_at')
-        finished_at_str = finished_at.strftime('%d.%m.%Y %H:%M:%S')
+
+        finished_at: datetime = day_offer.get('finished_at') if day_offer else None
+        finished_at_str = finished_at.strftime('%d.%m.%Y %H:%M:%S') if finished_at else None
         
         # Блок с популярными товарами
         top_products = Product.objects.filter(is_active=True).select_related('category').order_by('sort_index')[:8]
-        top_products_with_discount_prices = DiscountsManager().calculate_products_prices(
-            products_prices={product: None for product in top_products}
-        )
-        top_products_with_discount_prices = [{'obj': key, 'price': value} for key, value in top_products_with_discount_prices.items()]
+        if top_products:
+            top_products_with_discount_prices = DiscountsManager().calculate_products_prices(
+                products_prices={product: None for product in top_products}
+            )
+            top_products_with_discount_prices = [{'obj': key, 'price': value} for key, value in top_products_with_discount_prices.items()]
+        else:
+            top_products_with_discount_prices = []
 
         # Блок товаров с ограниченным тиражом
         limit_edition_products = Product.objects.filter(is_active=True)

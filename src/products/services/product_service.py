@@ -56,8 +56,8 @@ class ProductCacheService:
         и сохраняет в кэш вместе с products.
         """
         cache_key = f"products_in_category_{category_name}"
-        cached_data = cache.get(cache_key)
-        if cached_data is None:
+        # cached_data = cache.get(cache_key)
+        if cached_data := None is None:
             products_queryset = self.get_products_from_db(category_name)
             if len(products_queryset):
                 aggregation = products_queryset.aggregate(min_price=Min("price"), max_price=Max("price"))
