@@ -28,6 +28,7 @@ class User(AbstractUser):
     is_seller = models.BooleanField(default=False)
     phone_number = models.CharField(validators=[phone_number_regex],max_length=10,blank= True, null=True)
     avatar = models.ImageField(blank=True, null=True, validators=[validate_image_size])
+    username = models.CharField(max_length=150, unique=False, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
