@@ -1,8 +1,9 @@
+import json
 from typing import Any
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, Http404
 from django.views import generic
 from django.views.generic import ListView
 from django.db.models.signals import post_save, post_delete
@@ -15,6 +16,7 @@ from django.views.generic import DetailView
 from django.core.cache import cache
 
 from .models import ReviewModel
+from cart.cart_manager import CartManager
 from sellers.models import ProductSeller
 from .filter_service import FilterService
 from .models import Product
@@ -236,10 +238,22 @@ class AddProductInCart(View):
     Класс заглушка для добавления товара в корзину (нужно будет изменить после создания модели корзины)
     """
     def post(self, request):
-        username = request.user
-        data = request.POST
+        data = json.loads(request.body)
         product_seller_id = data.get('product_seller_id')
         amount = data.get('amount')
-        print(f'User {username} add in cart product_seller with id={product_seller_id} amount={amount}')
+        if not amount:
+            amount = 1
+
+        cart_manager = CartManager(request=request)
+        if product_seller_id:
+            product_seller = get_object_or_404(ProductSeller, id=product_seller_id)
+        else:
+            product_id = data.get('product_id')
+            if not product_id:
+                return Http404('Товар не найден')
+            product = get_object_or_404(Product, id=product_id)
+            product_seller: ProductSeller = cart_manager.get_product_seller_with_min_price(product)
+        
+        cart_manager.add_item(product=product_seller, quantity=amount)
         return JsonResponse({'success': 'Product added to cart successfully'})
 

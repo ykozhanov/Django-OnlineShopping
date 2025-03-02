@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db.models import Q, Sum, F
+from django.utils import timezone
 
 from cart.models import CartItem
 from discounts.models import Discount, DiscountBase, CartDiscount
@@ -41,23 +42,23 @@ class DiscountsManager:
             category_ids.update(discounts_dict[product]['category_ids'])
 
             # заполняем групповые скидки
-            for group in product.product_groups:
-                if group.discounts:
-                    discounts_dict[product]['group_discount'].extend(group.discounts)
+            for group in product.product_groups.all():
+                if group.discounts.all():
+                    discounts_dict[product]['group_discount'].extend(group.discounts.all())
             
         # Запрашиваем категории со связями на скидки
         categories = Category.objects.filter(id__in=category_ids).prefetch_related('discounts')
         discounts_by_category = {}
         for category in categories:
-            discounts_by_category[category.id] = category.discounts
+            discounts_by_category[category.id] = category.discounts.all()
 
         # Заполянем скидки на категории
-        for product, data in products_with_discounts.items():
+        for product, data in discounts_dict.items():
             for category_id in data['category_ids']:
                 discounts = discounts_by_category.get(category_id)
                 if discounts:
                     data['category_discounts'].extend(discounts)
-        return products_with_discounts
+        return discounts_dict
 
 
     def get_priority_products_discounts(self, products: list[Product]) -> dict[Product, list[Discount]]:
@@ -69,14 +70,15 @@ class DiscountsManager:
                 res[product] = []
                 continue
 
-            discounts: list[Discount] = data.get('group_discount').extend(data.get('category_discounts'))  # все имеющиеся скидки
+            discounts: list[Discount] = data.get('group_discount')
+            discounts.extend(data.get('category_discounts'))  # все имеющиеся скидки
             active_discounts: list[Discount] = []
             for discount in discounts:
                 if not discount.is_active:  # не включаем деактивированную
                     continue
-                if discount.end_date < datetime.now():  # не включаем с истекшим сроком скидки
+                if discount.end_date < timezone.now():  # не включаем с истекшим сроком скидки
                     continue
-                if discount.start_date and discount.start_date > datetime.now():  # не включаем с ненаступившим сроком скидки
+                if discount.start_date and discount.start_date > timezone.now():  # не включаем с ненаступившим сроком скидки
                     continue
                 active_discounts.append(discount)
 

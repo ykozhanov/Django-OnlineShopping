@@ -6,4 +6,4 @@ class BannerAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('title',)
-    fields = ('title', 'image', 'link', 'is_active')
+    fields = ('title', 'image', 'link', 'is_active', 'description')
