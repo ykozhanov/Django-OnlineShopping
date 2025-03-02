@@ -4,6 +4,7 @@ from django.http import HttpRequest
 
 from sellers.models import ProductSeller
 from cart.models import Cart, CartItem
+from products.models import Product
 
 class CartManager:
     """Manager of cart operations"""
@@ -30,6 +31,14 @@ class CartManager:
             cart, created = Cart.objects.get_or_create(session=session, user=None)
         return cart
     
+    def get_product_seller_with_min_price(self, product: Product) -> ProductSeller:
+        """Get product of specific seller with min price"""
+        product_sellers = ProductSeller.objects.filter(product=product).all()
+        if product_sellers:
+            product_seller = min(list(product_sellers), key=lambda x: x.price)
+            return product_seller
+        return None
+
     def add_item(self, product: ProductSeller, quantity: int = 1) -> CartItem:
         """Add item to cart. If item already exists in the cart - update quantity"""
         cart_item, created = CartItem.objects.get_or_create(cart=self._cart, product_seller=product)

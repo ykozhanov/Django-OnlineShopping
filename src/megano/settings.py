@@ -55,6 +55,16 @@ INSTALLED_APPS = [
 ]
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'UTC'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-random-product': {
+        'task': 'megano.tasks.update_random_product_task',
+        'schedule': crontab(minute=0, hour=0),  # Каждый день в полночь
+    },
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -1,8 +1,9 @@
+import json
 from typing import Any
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, Http404
 from django.views import generic
 from django.views.generic import ListView
 # from django.db.models.signals import post_save, post_delete
@@ -12,9 +13,10 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
 from django.views import View
 from django.views.generic import DetailView
-# from django.core.cache import cache
-#
-# from .models import ReviewModel
+from django.core.cache import cache
+
+from .models import ReviewModel
+from cart.cart_manager import CartManager
 from sellers.models import ProductSeller
 from cart.models import Cart, CartItem
 from .filter_service import FilterService
@@ -255,7 +257,23 @@ class AddProductInCart(View):
     Add product in user cart
     """
     def post(self, request):
-        change_or_create_cart_item(request=request)
+        data = json.loads(request.body)
+        product_seller_id = data.get('product_seller_id')
+        amount = data.get('amount')
+        if not amount:
+            amount = 1
+
+        cart_manager = CartManager(request=request)
+        if product_seller_id:
+            product_seller = get_object_or_404(ProductSeller, id=product_seller_id)
+        else:
+            product_id = data.get('product_id')
+            if not product_id:
+                return Http404('Товар не найден')
+            product = get_object_or_404(Product, id=product_id)
+            product_seller: ProductSeller = cart_manager.get_product_seller_with_min_price(product)
+        
+        cart_manager.add_item(product=product_seller, quantity=amount)
         return JsonResponse({'success': 'Product added to cart successfully'})
 
 

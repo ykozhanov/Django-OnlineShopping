@@ -15,10 +15,10 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'user-input', 'placeholder': 'Имя'})
+        # self.fields['username'].widget.attrs.update({'class': 'user-input', 'placeholder': 'Имя'})
         self.fields['email'].widget.attrs.update({'class': 'user-input', 'placeholder': 'E-mail'})
         self.fields['password1'].widget.attrs.update({'placeholder': 'Пароль'})
-        self.fields.pop('password2', None)
+        # self.fields.pop('password2', None)
         # self.fields['password2'].widget.attrs.update({'placeholder': 'Повторите пароль'})
 
 
