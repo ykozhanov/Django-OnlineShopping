@@ -12,103 +12,105 @@
 
 {% block content %}
     <div class="Middle">
-        <div class="wrap">
-            <div class="Product">
-                <div class="ProductCard">
-                    {% if products %}
+    <div class="wrap">
+        <div class="Product">
+            <div class="ProductCard">
+                {% if products %}
+                    {% for product in products %}
                         <div class="ProductCard-desc">
                             <div class="ProductCard-header">
-                                {% for product in products %}
-                                    <h2 class="ProductCard-title">{{ product.product.name }}</h2>
-                                    <div class="ProductCard-look">
-                                        <div class="ProductCard-photo">
-                                            <img src="{{ product.product.image.url }}" alt="{{ product.product.name }}"/>
-                                        </div>
+                                <h2 class="ProductCard-title">{{ product.product.name }}</h2>
+                                <div class="ProductCard-look">
+                                    <div class="ProductCard-photo">
+                                        <img src="{{ product.product.image.url }}" alt="{{ product.product.name }}"/>
                                     </div>
-                                    <div class="Tabs Tabs_default">
-                                        <div class="Tabs-wrap">
-                                            <div class="Tabs-block">
-                                                <div class="table">
-                                                    <table>
-                                                        <tr>
-                                                            <th class="hed">Характеристика</th>
-                                                            <th class="hed">Значение</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><b>Общие параметры</b></td>
-                                                            <td></td>
-                                                        </tr>
-                                                        {% if comparison_data %}
-                                                            {% if products|length < 2 %}
-                                                                <tr>
-                                                                    <td colspan="2">Добавьте, пожалуйста, больше товаров для сравнения.</td>
-                                                                </tr>
-                                                            {% else %}
-                                                                {% for characteristic_name, characteristic_data in comparison_data.items %}
-                                                                    <tr>
-                                                                        <td>{{ characteristic_name }}</td>
-                                                                        <td>{{ characteristic_data|get_item:product.product.name }}</td>
-                                                                    </tr>
-                                                                {% endfor %}
-                                                            {% endif %}
-                                                        {% else %}
+                                </div>
+
+                                <div class="Tabs Tabs_default">
+                                    <div class="Tabs-wrap">
+                                        <div class="Tabs-block" id="description">
+                                            <div class="table">
+                                                <table>
+                                                    <tr>
+                                                        <th class="hed">Характеристика</th>
+                                                        <th class="hed">Значение</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><b>Общие параметры</b></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    {% if comparison_data %}
+                                                        {% if products|length < 2 %}
                                                             <tr>
-                                                                <td colspan="2">
-                                                                    <p>Невозможно сравнить товары, у них нет общих характеристик.</p>
-                                                                    <p>"Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</p>
-                                                                </td>
+                                                                <td colspan="2">Добавьте, пожалуйста, больше товаров для сравнения.</td>
                                                             </tr>
+                                                        {% else %}
+                                                            {% for characteristic_name, characteristic_data in comparison_data.items %}
+                                                                <tr>
+                                                                    <td>{{ characteristic_name }}</td>
+                                                                    <td>{{ characteristic_data|get_item:product.product.name }}</td>
+                                                                </tr>
+                                                            {% endfor %}
                                                         {% endif %}
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <div class="ProductCard-info">
-                                    <div class="ProductCard-cost">
-                                        <div class="ProductCard-price">${{ product.price }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="ProductCard-cart">
-                                    <div class="ProductCard-cartElement">
-                                        <a class="btn btn_primary btn_buy" href="#" data-item-id="{{ product.pk }}">
-                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="Белая корзина" />
-                                            <span class="btn-content">Добавить в корзину</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="ProductCard-cart">
-                                    <div class="ProductCard-cartElement">
-                                        <a class="btn btn_primary btn_comparison_del" href="#" data-item-id="{{ product.pk }}">
-                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
-                                            <span class="btn-content">Не сравнивать</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div id="modal_open" class="my_modal">
-                                    <div class="my_modal-dialog">
-                                        <div class="my_modal-content">
-                                            <div class="my_modal-header">
-                                                <p class="my_modal-title">Поздравляем!</p>
-                                                <a href="#" title="Закрыть модальное окно" class="close">×</a>
-                                            </div>
-                                            <div class="my_modal-body">
-                                                <p>Товар успешно добавлен в корзину!</p>
+                                                    {% else %}
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                <p>Невозможно сравнить товары, у них нет общих характеристик.</p>
+                                                                <p>"Сравнивать то, что сравнить нельзя - все равно что пытаться поймать ветер."</p>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {% endfor %}
+                            </div>
+
+                            <div class="ProductCard-info">
+                                <div class="ProductCard-cost">
+                                    <div class="ProductCard-price">${{ product.price }}</div>
+                                </div>
+                            </div>
+
+                            <div class="ProductCard-cart">
+                                <div class="ProductCard-cartElement">
+                                    <a class="btn btn_primary btn_buy" href="#" data-item-id="{{ product.pk }}">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="Белая корзина" />
+                                        <span class="btn-content">Добавить в корзину</span>
+                                    </a>
+                                </div>
+                                <div class="ProductCard-cartElement">
+                                    <a class="btn btn_primary btn_comparison_del" href="#" data-item-id="{{ product.pk }}">
+                                        <img class="btn-icon" src="{% static 'assets/img/icons/card/product_comparison.svg' %}" alt="Сравнение товаров" width="23px" height="23px"/>
+                                        <span class="btn-content">Не сравнивать</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    {% else %}
-                        <h2 class="ProductCard-title">Нет товаров для сравнения</h2>
-                    {% endif %}
-                </div>
+                    {% endfor %}
+                {% else %}
+                    <h2 class="ProductCard-title">Нет товаров для сравнения</h2>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="modal_open" class="my_modal">
+    <div class="my_modal-dialog">
+        <div class="my_modal-content">
+            <div class="my_modal-header">
+                <p class="my_modal-title">Поздравляем!</p>
+                <a href="#" title="Закрыть модальное окно" class="close">×</a>
+            </div>
+            <div class="my_modal-body">
+                <p>Товар успешно добавлен в корзину!</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 <script>
