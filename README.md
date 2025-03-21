@@ -67,7 +67,7 @@ docker compose up
 ![Информация о товаре](screenshots/screenshot_3.png)
 ***
 
-_**Сравнение товаров**_
+**Сравнение товаров**
 
 ![Сравнение товаров](screenshots/screenshot_4.png)
 ***
