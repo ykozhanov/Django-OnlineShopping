@@ -79,17 +79,17 @@ docker compose up
 - Разработка сервиса регистрации и аутентификации
 - Импорт товаров в формате .json файла через Django админку
 - Разработка сервиса сравнения товаров и интеграция в верстку
-- Контейнеризация проекта через docker-compose с созданием базы данных PostgreSQL, Redis (для кэширования) и созданием суперпользователя.
+- Контейнеризация проекта через docker-compose с созданием базы данных PostgreSQL, Redis (для кэширования) и созданием суперпользователя
 
 
 ## Используемые инструменты
-- [Python](https://www.python.org/) как основной язык программирования;
-- [Django](https://www.djangoproject.com/) как веб-фреймворк;
-- [PostreSQL](https://www.postgresql.org/) как база данных;
-- [Django ORM](https://docs.djangoproject.com/en/5.1/topics/db/queries/) как ORM инструмент;
-- [Celery](https://docs.celeryq.dev/) как инструмент выполнения фоновых задач;
-- [Redis](https://github.com/redis/redis) как брокер сообщений для фоновых задач;
-- [Docker](https://www.docker.com/) для контейнеризации приложения.
+- [Python](https://www.python.org/) как основной язык программирования
+- [Django](https://www.djangoproject.com/) как веб-фреймворк
+- [PostreSQL](https://www.postgresql.org/) как база данных
+- [Django ORM](https://docs.djangoproject.com/en/5.1/topics/db/queries/) как ORM инструмент
+- [Celery](https://docs.celeryq.dev/) как инструмент выполнения фоновых задач
+- [Redis](https://github.com/redis/redis) как брокер сообщений для фоновых задач
+- [Docker](https://www.docker.com/) для контейнеризации приложения
 
 
 ## Контакты
